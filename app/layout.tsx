@@ -4,6 +4,7 @@ import { Outfit, Geist_Mono } from 'next/font/google';
 import './globals.css';
 
 import { ThemeProvider } from '@/components/theme-provider';
+import { Providers } from './providers';
 
 /* ────────────────────  GOOGLE FONTS  ──────────────────── */
 
@@ -34,14 +35,11 @@ export default function RootLayout({
     <html lang="en" className={`${outfit.variable}`}>
       {/* ThemeProvider must wrap <body> content */}
       <body className="antialiased">
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
-        >
-          {children}
-        </ThemeProvider>
+        
+          <Providers>
+            {children}
+          </Providers>
+        
       </body>
     </html>
   );
