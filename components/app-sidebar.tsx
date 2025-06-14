@@ -127,22 +127,24 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
   return (
     <Sidebar variant="inset" {...props}>
-      <SidebarHeader>
+      <SidebarHeader className="mb-2">
         <SidebarMenu>
           <SidebarMenuItem>
             
             <SidebarTopbar />
 
-            <h2 className="text-sm font-medium leading-tight text-sidebar-primary">
+            <h2 className="text-lg font-semibold leading-tight text-sidebar-primary text-center">
               Uraan Chat
             </h2>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
-
       <SidebarContent>
-        <SidebarMenuItem>
-          <SidebarMenuButton className="items-center font-semibold bg-primary text-primary-foreground hover:bg-accent hover:text-accent-foreground">
+
+          <SidebarMenuButton
+            asChild
+            className="items-center font-semibold bg-primary text-primary-foreground hover:bg-accent hover:text-accent-foreground"
+          >
             <Link
               href="/"
               aria-label="Start a new chat"
@@ -151,11 +153,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               New Chat
             </Link>
           </SidebarMenuButton>
-        </SidebarMenuItem>
 
         {/* Pinned Chats */}
         {data.chats.some((chat) => chat.pinned) && (
-          <div className="px-3 pt-4">
+          <div className="px-3 pt-4 space-y-2">
             <p className="mb-1 text-xs text-muted-foreground">Pinned</p>
             {data.chats
               .filter((chat) => chat.pinned)
@@ -175,6 +176,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           </div>
         ))}
       </SidebarContent>
+
 
       <SidebarFooter>
         <NavUser user={data.user} />
