@@ -18,7 +18,7 @@ const SYSTEM_MESSAGE: Message = {
   id: 'system',
   role: 'system',
   content:
-    'You are a helpful, concise AI assistant. Always format responses using Markdown. Use triple backticks for code blocks and include language names for syntax highlighting.',
+    'You are a helpful, concise AI assistant. Always format responses using Markdown.',
 };
 
 export async function POST(req: NextRequest) {
