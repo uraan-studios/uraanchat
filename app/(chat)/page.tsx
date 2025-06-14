@@ -293,7 +293,7 @@ export default function ChatPage() {
     'max-w-[50%] min-w-[140px] text-[15px]';
 
   return (
-    <div className="h-[100dvh] flex flex-col overflow-hidden items-center">
+    <div className="h-full flex flex-col overflow-hidden items-center">
       <ScrollArea
         className="flex-1 min-h-0 w-full px-4 pb-4"
         aria-label="Conversation"

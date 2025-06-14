@@ -12,7 +12,7 @@ const ChatLayout = ({
     <body className='overflow-y-clip'>
         <SidebarProvider>
             <AppSidebar />
-            <SidebarInset className='overflow-y-hidden'>
+            <SidebarInset className='overflow-y-clip'>
               {children}
             </SidebarInset>
         </SidebarProvider>
