@@ -22,6 +22,9 @@ import {
   Globe2,
   Code2,
   BookOpen,
+  Brain,
+  ChevronDown,
+  ChevronUp,
 } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
@@ -79,7 +82,7 @@ const TABS: Record<
     examples: [
       'Teach me the basics of linear regression',
       'What are the key events of the French Revolution?',
-      'Summarise “Thinking, Fast and Slow” in 5 bullets',
+      'Summarise "Thinking, Fast and Slow" in 5 bullets',
       'How does compound interest work?',
     ],
   },
@@ -87,30 +90,49 @@ const TABS: Record<
 
 const TOP_SPACER_HEIGHT = 32; // px
 
+/* ────────────────────────  TYPES  ─────────────────────────── */
+
+interface ReasoningDetail {
+  type: 'text' | 'redacted';
+  text?: string;
+}
+
 /* ────────────────────────  MARKDOWN HELPERS  ─────────────────── */
 
-function CodeBlock(
+function getTextContent(node: React.ReactNode): string {
+  if (typeof node === 'string') return node;
+  if (Array.isArray(node)) return node.map(getTextContent).join('');
+  if (React.isValidElement(node)) return getTextContent(node.props.children);
+  return '';
+}
+
+export function CodeBlock(
   props: React.ComponentProps<'code'> & { inline?: boolean },
 ) {
-  const { className, children, ...rest } = props;
+  const { className, children, inline, ...rest } = props;
+  const rawText = getTextContent(children);
 
-  // ------------------------------------------------------------
-  // Multi-line if we have a language-xxx class  ➜ syntax highlight
-  // ------------------------------------------------------------
-  const isBlock = !!className?.startsWith('language-');
+  const isProbablyBlock = () => {
+    if (className?.startsWith('language-')) return true;
+    const lineBreaks = rawText.includes('\n');
+    const wordCount = rawText.trim().split(/\s+/).length;
+    const charCount = rawText.trim().length;
+    return lineBreaks || wordCount > 2 || charCount > 80;
+  };
+
+  const isBlock = inline !== undefined ? !inline : isProbablyBlock();
+
   if (!isBlock) {
     return (
       <code
         {...rest}
-        className="px-1 py-0.5 rounded bg-card text-[0.92em]
-                   whitespace-pre break-words"
+        className="px-1 py-0.5 rounded bg-card  whitespace-pre break-words"
       >
         {children}
       </code>
     );
   }
 
-  /* ------------  real block code path (unchanged) ------------ */
   const [copied, setCopied] = React.useState(false);
   const codeRef = React.useRef<HTMLElement | null>(null);
 
@@ -121,19 +143,15 @@ function CodeBlock(
     setTimeout(() => setCopied(false), 1500);
   };
 
-  const lang = className.match(/language-(\w+)/)?.[1]?.toUpperCase() ?? 'TEXT';
+  const lang = className?.match(/language-(\w+)/)?.[1]?.toUpperCase() ?? 'TEXT';
 
   return (
     <div className="relative group my-6 first:mt-0 last:mb-0">
-      <div
-        className="text-xs bg-gray-700 text-gray-100 px-2 py-1 rounded-t-lg
-                   flex items-center justify-between"
-      >
+      <div className="text-xs bg-card px-2 py-1 rounded-t-lg flex items-center justify-between">
         <span>{lang}</span>
         <button
           onClick={copy}
-          className="flex items-center gap-1 opacity-60 hover:opacity-100
-                     transition"
+          className="flex items-center gap-1 opacity-60 hover:opacity-100 transition"
         >
           {copied ? <Check size={12} /> : <Copy size={12} />}
           {copied ? 'Copied' : 'Copy'}
@@ -141,8 +159,7 @@ function CodeBlock(
       </div>
 
       <pre
-        className={`${className} rounded-b-lg p-4 bg-gray-800
-                    dark:bg-gray-900 overflow-x-auto`}
+        className={`${className} rounded-b-lg p-4 bg-gray-800 dark:bg-gray-900 overflow-x-auto`}
       >
         <code ref={codeRef} {...rest}>
           {children}
@@ -152,26 +169,154 @@ function CodeBlock(
   );
 }
 
+// ADDED: Spacing for markdown elements to improve readability
 const markdownComponents = {
+  p: (props: React.ComponentProps<'p'>) => (
+    <p {...props} className="my-4 first:mt-0 last:mb-0" />
+  ),
+  h1: (props: React.ComponentProps<'h1'>) => (
+    <h1 {...props} className="text-3xl font-bold my-6 first:mt-0" />
+  ),
+  h2: (props: React.ComponentProps<'h2'>) => (
+    <h2
+      {...props}
+      className="text-2xl font-semibold my-5 pb-2 border-b first:mt-0"
+    />
+  ),
+  h3: (props: React.ComponentProps<'h3'>) => (
+    <h3 {...props} className="text-xl font-semibold my-4 first:mt-0" />
+  ),
+  blockquote: (props: React.ComponentProps<'blockquote'>) => (
+    <blockquote
+      {...props}
+      className="my-4 pl-4 border-l-4 italic first:mt-0 last:mb-0"
+    />
+  ),
+  hr: (props: React.ComponentProps<'hr'>) => (
+    <hr {...props} className="my-6" />
+  ),
   code: CodeBlock,
   li: (props: React.ComponentProps<'li'>) => (
     <li {...props} className="marker:text-primary" />
   ),
   ol: (props: React.ComponentProps<'ol'>) => (
-    <ol {...props} className="list-decimal pl-6 marker:text-primary" />
+    <ol
+      {...props}
+      className="list-decimal pl-6 my-4 marker:text-primary first:mt-0 last:mb-0"
+    />
   ),
   ul: (props: React.ComponentProps<'ul'>) => (
-    <ul {...props} className="list-disc pl-6 marker:text-primary" />
+    <ul
+      {...props}
+      className="list-disc pl-6 my-4 marker:text-primary first:mt-0 last:mb-0"
+    />
   ),
   a: (props: React.ComponentProps<'a'>) => (
     <a
       {...props}
-      className="text-blue-600 underline hover:text-blue-800 dark:text-blue-400"
+      className="text-primary underline hover:text-accent"
       target="_blank"
       rel="noreferrer"
     />
   ),
 };
+
+/* ────────────────────────  REASONING COMPONENT  ─────────────────── */
+
+function ReasoningBlock({ details }: { details: ReasoningDetail[] }) {
+  const [isExpanded, setIsExpanded] = useState(false);
+
+  const reasoningText = details
+    .map((detail) => (detail.type === 'text' ? detail.text : '<redacted>'))
+    .join('');
+
+  return (
+    <div className="my-4 border border-amber-200 dark:border-amber-800 rounded-lg overflow-hidden">
+      <button
+        onClick={() => setIsExpanded(!isExpanded)}
+        className="w-full flex items-center gap-2 px-3 py-2 bg-amber-50 dark:bg-amber-900/20 
+                   hover:bg-amber-100 dark:hover:bg-amber-900/30 transition-colors"
+      >
+        <Brain className="w-4 h-4 text-amber-600 dark:text-amber-400" />
+        <span className="text-sm font-medium text-amber-800 dark:text-amber-300">
+          Reasoning Process
+        </span>
+        <div className="flex-1" />
+        {isExpanded ? (
+          <ChevronUp className="w-4 h-4 text-amber-600 dark:text-amber-400" />
+        ) : (
+          <ChevronDown className="w-4 h-4 text-amber-600 dark:text-amber-400" />
+        )}
+      </button>
+
+      {isExpanded && (
+        <div className="p-3 bg-amber-25 dark:bg-amber-950/20 border-t border-amber-100 dark:border-amber-800">
+          <pre className="text-xs text-amber-900 dark:text-amber-200 whitespace-pre-wrap font-mono leading-relaxed">
+            {reasoningText}
+          </pre>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ────────────────────────  MESSAGE RENDERER  ─────────────────── */
+
+function MessageContent({ message }: { message: Message }) {
+  // If message has parts, render them; otherwise fall back to content
+  if (message.parts && message.parts.length > 0) {
+    return (
+      <div className="w-full">
+        {message.parts.map((part, index) => {
+          if (part.type === 'text') {
+            return (
+              <div key={index}>
+                <ReactMarkdown
+                  remarkPlugins={[remarkGfm]}
+                  rehypePlugins={[rehypeHighlight]}
+                  components={markdownComponents}
+                >
+                  {part.text}
+                </ReactMarkdown>
+              </div>
+            );
+          }
+
+          if (part.type === 'reasoning') {
+            // Handle reasoning part - it might be a string or array
+            let details: ReasoningDetail[];
+            if (typeof part.reasoning === 'string') {
+              details = [{ type: 'text', text: part.reasoning }];
+            } else if (Array.isArray(part.reasoning)) {
+              details = part.reasoning.map((detail) => ({
+                type: detail.type,
+                text: detail.text,
+              }));
+            } else {
+              details = [{ type: 'text', text: String(part.reasoning) }];
+            }
+            return <ReasoningBlock key={index} details={details} />;
+          }
+
+          return null;
+        })}
+      </div>
+    );
+  }
+
+  // Fallback to regular content rendering
+  return (
+    <div className="w-full">
+      <ReactMarkdown
+        remarkPlugins={[remarkGfm]}
+        rehypePlugins={[rehypeHighlight]}
+        components={markdownComponents}
+      >
+        {message.content}
+      </ReactMarkdown>
+    </div>
+  );
+}
 
 /* ────────────────────────  EMPTY STATE  ─────────────────────── */
 
@@ -236,7 +381,8 @@ export default function ChatPage() {
     setMessages,
     reload,
   } = useChat({
-    api: '/api/ai/gemini-2.0-flash',
+    api: '/api/ai/gemini-2.5-flash',
+    streamMode: 'parts',
     onFinish() {
       setTimeout(() => bottomRef.current?.scrollIntoView(), 50);
     },
@@ -289,11 +435,21 @@ export default function ChatPage() {
   };
 
   const userBubble =
-    'bg-blue-500 text-white rounded-xl px-4 py-2 inline-block ' +
-    'max-w-[50%] min-w-[140px] text-[15px]';
+    'bg-card  rounded-xl px-4 py-2 inline-block ' +
+    'max-w-[50%] min-w-[140px] ';
+
+  const getMessageContent = (message: Message) => {
+    if (message.parts) {
+      return message.parts
+        .filter((part) => part.type === 'text')
+        .map((part) => part.text)
+        .join('');
+    }
+    return message.content;
+  };
 
   return (
-    <div className="h-full flex flex-col overflow-hidden items-center">
+    <div className="h-[98dvh] flex flex-col overflow-hidden items-center">
       <ScrollArea
         className="flex-1 min-h-0 w-full px-4 pb-4"
         aria-label="Conversation"
@@ -305,7 +461,7 @@ export default function ChatPage() {
           {messages.length === 0 ? (
             <EmptyState onExampleClick={clickPrompt} />
           ) : (
-            messages.map((m, i) => {
+            (messages as Message[]).map((m, i) => {
               const isUser = m.role === 'user';
 
               return (
@@ -316,22 +472,16 @@ export default function ChatPage() {
                   {isUser ? (
                     <div className={userBubble}>{m.content}</div>
                   ) : (
-                    <div className="w-full">
-                      <ReactMarkdown
-                        remarkPlugins={[remarkGfm]}
-                        rehypePlugins={[rehypeHighlight]}
-                        components={markdownComponents}
-                      >
-                        {m.content}
-                      </ReactMarkdown>
+                    <>
+                      <MessageContent message={m} />
 
                       <div
-                        className="mt-2 flex items-center gap-2 text-[10px]
+                        className="mt-2 flex items-center gap-2 
                           text-gray-500"
                       >
                         <button
                           onClick={() =>
-                            navigator.clipboard.writeText(m.content)
+                            navigator.clipboard.writeText(getMessageContent(m))
                           }
                           className="p-1 rounded hover:bg-gray-200
                             dark:hover:bg-gray-700"
@@ -350,7 +500,7 @@ export default function ChatPage() {
                           </button>
                         )}
                       </div>
-                    </div>
+                    </>
                   )}
                 </div>
               );
@@ -359,9 +509,7 @@ export default function ChatPage() {
 
           {isLoading && (
             <div className="w-full">
-              <div
-                className="max-w-2xl mx-auto px-4 py-3 space-x-2 flex"
-              >
+              <div className="max-w-2xl mx-auto px-4 py-3 space-x-2 flex">
                 <div className="w-2 h-2 rounded-full bg-gray-400 animate-bounce" />
                 <div
                   className="w-2 h-2 rounded-full bg-gray-400 animate-bounce"

@@ -18,7 +18,7 @@ const SYSTEM_MESSAGE: Message = {
   id: 'system',
   role: 'system',
   content:
-    'You are a helpful, concise AI assistant. Always format responses using Markdown.',
+    'You are a helpful, concise AI assistant made by Uraan Studios called Uraan Chat. Always format responses using Markdown.',
 };
 
 export async function POST(req: NextRequest) {

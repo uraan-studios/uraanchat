@@ -1,44 +1,48 @@
-import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
-import "./globals.css";
-import { ThemeProvider } from "@/components/theme-provider";
-import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
-import { AppSidebar } from "@/components/app-sidebar";
+/* app/layout.tsx (RootLayout) */
+import type { Metadata } from 'next';
+import { Outfit, Geist_Mono } from 'next/font/google';
+import './globals.css';
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
+import { ThemeProvider } from '@/components/theme-provider';
+
+/* ────────────────────  GOOGLE FONTS  ──────────────────── */
+
+const outfit = Outfit({
+  variable: '--font-sans', // generic “sans” variable
 });
 
 const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
+  subsets: ['latin'],
+  variable: '--font-mono',
 });
 
+/* ────────────────────  METADATA  ──────────────────── */
+
 export const metadata: Metadata = {
-  title: "Uraan Chat",
-  description: "- Clonathon T3 Chat",
+  title: 'Uraan Chat',
+  description: '- Clonathon T3 Chat',
 };
+
+/* ────────────────────  ROOT LAYOUT  ──────────────────── */
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
-    <html lang="en">
-      <ThemeProvider
+    <html lang="en" className={`${outfit.variable}`}>
+      {/* ThemeProvider must wrap <body> content */}
+      <body className="antialiased">
+        <ThemeProvider
           attribute="class"
           defaultTheme="system"
           enableSystem
           disableTransitionOnChange
         >
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
           {children}
-      </body>
         </ThemeProvider>
+      </body>
     </html>
   );
 }
