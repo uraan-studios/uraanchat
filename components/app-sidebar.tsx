@@ -21,6 +21,7 @@ import {
   SidebarMenuItem,
   SidebarTrigger,
 } from "@/components/ui/sidebar"
+import SidebarTopbar from "./sidebar-topbar"
 
 const data = {
   user: {
@@ -129,9 +130,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
-            <div className="fixed top-2 left-2 bg-card">
-              <SidebarTrigger className="-ml-1" />
-            </div>
+            
+            <SidebarTopbar />
+
             <h2 className="text-sm font-medium leading-tight text-sidebar-primary">
               Uraan Chat
             </h2>
