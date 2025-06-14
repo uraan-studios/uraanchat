@@ -31,7 +31,8 @@ export default function ChatPage() {
   });
 
   return (
-    <div className="flex flex-col h-screen bg-gray-50 dark:bg-gray-900">
+    
+    <div className="flex flex-col h-screen">
       <header className="border-b dark:border-gray-700 p-4">
         <h1 className="text-xl font-bold text-center">AI Assistant</h1>
       </header>
