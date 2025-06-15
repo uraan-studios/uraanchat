@@ -5,6 +5,7 @@ import { useChat } from '@ai-sdk/react';
 import { ConversationView } from '@/components/chat/conversation-view';
 import { ChatInput, Attachment } from '@/components/chat/chat-input';
 import { MODELS } from '@/lib/models';
+import { toast } from 'sonner';
 
 export default function ChatPage() {
   const bottomRef = useRef<HTMLDivElement | null>(null);
@@ -40,11 +41,16 @@ export default function ChatPage() {
     isLoading,
     setMessages,
     reload,
+    error,
+    stop
   } = useChat({
     api: '/api/chat',
     body: { model,  },
     onFinish() {
       setTimeout(() => bottomRef.current?.scrollIntoView(), 50);
+    },
+    onError(error) {
+      toast.error(error.message);
     },
   });
 

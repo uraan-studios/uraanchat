@@ -1,62 +1,115 @@
 // app/api/chat/route.ts
+import { auth } from "@/lib/auth";
+import db from "@/lib/db";
 import { createOpenRouter } from "@openrouter/ai-sdk-provider";
 import { streamText, CoreMessage } from "ai";
 import { NextRequest, NextResponse } from "next/server";
 
-// Use the edge runtime for best streaming performance
-export const runtime = "edge";
+// Optional: Use edge runtime for lower latency
+// export const runtime = "edge";
 
-// Initialize the OpenRouter provider with the API key from environment variables
 const openrouter = createOpenRouter({
   apiKey: process.env.OPENROUTER_API_KEY!,
 });
 
 export async function POST(req: NextRequest) {
   try {
+    // AUTH
+    const session = await auth.api.getSession(req);
+    const userId = session?.user?.id;
+    if (!userId) {
+      return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
+    }
+
     const body = await req.json();
-    // Ensure messages and model are present in the request body
-    const { messages, model }: { messages: CoreMessage[]; model: string } =
-      body;
+    const { id, messages, model }: { id: string; messages: CoreMessage[]; model: string } = body;
 
     if (!model) {
-      return new Response(JSON.stringify({ error: "Model is required" }), {
-        status: 400,
-        headers: { "Content-Type": "application/json" },
-      });
+      return NextResponse.json({ error: "Model is required" }, { status: 400 });
     }
 
     if (!messages || messages.length === 0) {
-      return new Response(
-        JSON.stringify({ error: "Messages are required" }),
-        {
-          status: 400,
-          headers: { "Content-Type": "application/json" },
-        }
-      );
+      return NextResponse.json({ error: "Messages are required" }, { status: 400 });
     }
 
-    // Get the specific model from the provider
-    const chatModel = openrouter.chat(model);
+    // Use existing chat if `id` exists
+    let chat = await db.chat.findUnique({
+      where: { id },
+    });
 
-    // Call the streamText function with the model and messages
+    // Optional: Validate ownership of existing chat
+    if (chat && chat.userId !== userId) {
+      return NextResponse.json({ error: "Unauthorized access to chat" }, { status: 403 });
+    }
+
+    if (!chat) {
+      chat = await db.chat.create({
+        data: {
+          id,
+          userId,
+          title: "", // Optional: You can set a preview of the first user message
+          rootMessage: "", // Optional: Set later if needed
+        },
+      });
+    }
+
+    // Insert the last user message (assumes it's the most recent in the list)
+    const userMessage = messages.findLast((m) => m.role === "user");
+    if (userMessage) {
+      await db.message.create({
+        data: {
+          chatId: chat.id,
+          userId,
+          role: "user",
+          content: userMessage as unknown as object, // Store full message as JSON
+        },
+      });
+    }
+
+    // Stream LLM response
+    const chatModel = openrouter.chat(model);
     const result = await streamText({
       model: chatModel,
       messages,
+      async onFinish(result) {
+        try {
+          const assistantMessage = result.response.messages[0];
+          if (assistantMessage) {
+            const saved = await db.message.create({
+              data: {
+                chatId: chat!.id,
+                userId: null,
+                role: "assistant",
+                content: assistantMessage as unknown as object,
+              },
+              select: { id: true },
+            });
+
+            console.log("Assistant message saved with ID:", saved.id);
+
+            // Optional: Update chat title or rootMessage based on first messages
+            // await db.chat.update({
+            //   where: { id: chat.id },
+            //   data: { title: ..., rootMessage: ... }
+            // });
+          }
+        } catch (saveError) {
+          console.error("Failed to save assistant message:", saveError);
+        }
+      },
     });
 
-    // Return the stream as a Data Stream response
     return result.toDataStreamResponse({
       sendReasoning: true,
       sendSources: true,
     });
   } catch (error) {
-    // Generic error handling
-    console.error(error);
-    const errorMessage =
-      error instanceof Error ? error.message : "An unknown error occurred";
-    return new NextResponse(JSON.stringify({ error: errorMessage }), {
-      status: 500,
-      headers: { "Content-Type": "application/json" },
-    });
+    console.error("Chat error:", error);
+    return NextResponse.json(
+      {
+        error: error instanceof Error ? error.message : "An unknown error occurred",
+      },
+      { status: 500 }
+    );
   }
 }

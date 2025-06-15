@@ -1,0 +1,33 @@
+.model small
+.stack 100h
+.data
+    num db 6              ; Number to check
+    msg_even db "Even$" 
+    msg_odd db "Odd$"
+.code
+main:
+    mov ax, @data
+    mov ds, ax
+
+    mov al, num           ; Loading number into AL
+    mov ah, 0             ; Clearing AH for 8-bit division
+    mov bl, 2             ; Divisor = 2
+    div bl                ; AL / BL → Quotient in AL, Remainder in AH
+
+    cmp ah, 0             ; Checking if remainder is 0
+    je is_even            ; If yes, number is even
+
+is_odd:
+    lea dx, msg_odd
+    jmp display
+
+is_even:
+    lea dx, msg_even
+
+display:
+    mov ah, 09h
+    int 21h
+
+    mov ah, 4ch
+    int 21h
+end main

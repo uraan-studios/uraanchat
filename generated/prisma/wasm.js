@@ -248,12 +248,12 @@ exports.Prisma.SortOrder = {
   desc: 'desc'
 };
 
-exports.Prisma.NullableJsonNullValueInput = {
-  DbNull: Prisma.DbNull,
+exports.Prisma.JsonNullValueInput = {
   JsonNull: Prisma.JsonNull
 };
 
-exports.Prisma.JsonNullValueInput = {
+exports.Prisma.NullableJsonNullValueInput = {
+  DbNull: Prisma.DbNull,
   JsonNull: Prisma.JsonNull
 };
 
@@ -269,15 +269,6 @@ exports.Prisma.ChatOrderByRelevanceFieldEnum = {
   rootMessage: 'rootMessage'
 };
 
-exports.Prisma.MessageOrderByRelevanceFieldEnum = {
-  id: 'id',
-  chatId: 'chatId',
-  userId: 'userId',
-  role: 'role',
-  content: 'content',
-  parentId: 'parentId'
-};
-
 exports.Prisma.JsonNullValueFilter = {
   DbNull: Prisma.DbNull,
   JsonNull: Prisma.JsonNull,
@@ -287,6 +278,14 @@ exports.Prisma.JsonNullValueFilter = {
 exports.Prisma.QueryMode = {
   default: 'default',
   insensitive: 'insensitive'
+};
+
+exports.Prisma.MessageOrderByRelevanceFieldEnum = {
+  id: 'id',
+  chatId: 'chatId',
+  userId: 'userId',
+  role: 'role',
+  parentId: 'parentId'
 };
 
 exports.Prisma.MessageModelInfoOrderByRelevanceFieldEnum = {

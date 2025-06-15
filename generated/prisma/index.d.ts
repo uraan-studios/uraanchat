@@ -2962,7 +2962,6 @@ export namespace Prisma {
     chatId: string | null
     userId: string | null
     role: string | null
-    content: string | null
     parentId: string | null
     createdAt: Date | null
   }
@@ -2972,7 +2971,6 @@ export namespace Prisma {
     chatId: string | null
     userId: string | null
     role: string | null
-    content: string | null
     parentId: string | null
     createdAt: Date | null
   }
@@ -2994,7 +2992,6 @@ export namespace Prisma {
     chatId?: true
     userId?: true
     role?: true
-    content?: true
     parentId?: true
     createdAt?: true
   }
@@ -3004,7 +3001,6 @@ export namespace Prisma {
     chatId?: true
     userId?: true
     role?: true
-    content?: true
     parentId?: true
     createdAt?: true
   }
@@ -3097,7 +3093,7 @@ export namespace Prisma {
     chatId: string
     userId: string | null
     role: string
-    content: string
+    content: JsonValue
     parentId: string | null
     createdAt: Date
     _count: MessageCountAggregateOutputType | null
@@ -3174,7 +3170,7 @@ export namespace Prisma {
       chatId: string
       userId: string | null
       role: string
-      content: string
+      content: Prisma.JsonValue
       parentId: string | null
       createdAt: Date
     }, ExtArgs["result"]["message"]>
@@ -3556,7 +3552,7 @@ export namespace Prisma {
     readonly chatId: FieldRef<"Message", 'String'>
     readonly userId: FieldRef<"Message", 'String'>
     readonly role: FieldRef<"Message", 'String'>
-    readonly content: FieldRef<"Message", 'String'>
+    readonly content: FieldRef<"Message", 'Json'>
     readonly parentId: FieldRef<"Message", 'String'>
     readonly createdAt: FieldRef<"Message", 'DateTime'>
   }
@@ -13990,19 +13986,19 @@ export namespace Prisma {
   export type SortOrder = (typeof SortOrder)[keyof typeof SortOrder]
 
 
+  export const JsonNullValueInput: {
+    JsonNull: typeof JsonNull
+  };
+
+  export type JsonNullValueInput = (typeof JsonNullValueInput)[keyof typeof JsonNullValueInput]
+
+
   export const NullableJsonNullValueInput: {
     DbNull: typeof DbNull,
     JsonNull: typeof JsonNull
   };
 
   export type NullableJsonNullValueInput = (typeof NullableJsonNullValueInput)[keyof typeof NullableJsonNullValueInput]
-
-
-  export const JsonNullValueInput: {
-    JsonNull: typeof JsonNull
-  };
-
-  export type JsonNullValueInput = (typeof JsonNullValueInput)[keyof typeof JsonNullValueInput]
 
 
   export const NullsOrder: {
@@ -14023,18 +14019,6 @@ export namespace Prisma {
   export type ChatOrderByRelevanceFieldEnum = (typeof ChatOrderByRelevanceFieldEnum)[keyof typeof ChatOrderByRelevanceFieldEnum]
 
 
-  export const MessageOrderByRelevanceFieldEnum: {
-    id: 'id',
-    chatId: 'chatId',
-    userId: 'userId',
-    role: 'role',
-    content: 'content',
-    parentId: 'parentId'
-  };
-
-  export type MessageOrderByRelevanceFieldEnum = (typeof MessageOrderByRelevanceFieldEnum)[keyof typeof MessageOrderByRelevanceFieldEnum]
-
-
   export const JsonNullValueFilter: {
     DbNull: typeof DbNull,
     JsonNull: typeof JsonNull,
@@ -14050,6 +14034,17 @@ export namespace Prisma {
   };
 
   export type QueryMode = (typeof QueryMode)[keyof typeof QueryMode]
+
+
+  export const MessageOrderByRelevanceFieldEnum: {
+    id: 'id',
+    chatId: 'chatId',
+    userId: 'userId',
+    role: 'role',
+    parentId: 'parentId'
+  };
+
+  export type MessageOrderByRelevanceFieldEnum = (typeof MessageOrderByRelevanceFieldEnum)[keyof typeof MessageOrderByRelevanceFieldEnum]
 
 
   export const MessageModelInfoOrderByRelevanceFieldEnum: {
@@ -14295,7 +14290,7 @@ export namespace Prisma {
     chatId?: StringFilter<"Message"> | string
     userId?: StringNullableFilter<"Message"> | string | null
     role?: StringFilter<"Message"> | string
-    content?: StringFilter<"Message"> | string
+    content?: JsonFilter<"Message">
     parentId?: StringNullableFilter<"Message"> | string | null
     createdAt?: DateTimeFilter<"Message"> | Date | string
     chat?: XOR<ChatScalarRelationFilter, ChatWhereInput>
@@ -14331,7 +14326,7 @@ export namespace Prisma {
     chatId?: StringFilter<"Message"> | string
     userId?: StringNullableFilter<"Message"> | string | null
     role?: StringFilter<"Message"> | string
-    content?: StringFilter<"Message"> | string
+    content?: JsonFilter<"Message">
     parentId?: StringNullableFilter<"Message"> | string | null
     createdAt?: DateTimeFilter<"Message"> | Date | string
     chat?: XOR<ChatScalarRelationFilter, ChatWhereInput>
@@ -14363,7 +14358,7 @@ export namespace Prisma {
     chatId?: StringWithAggregatesFilter<"Message"> | string
     userId?: StringNullableWithAggregatesFilter<"Message"> | string | null
     role?: StringWithAggregatesFilter<"Message"> | string
-    content?: StringWithAggregatesFilter<"Message"> | string
+    content?: JsonWithAggregatesFilter<"Message">
     parentId?: StringNullableWithAggregatesFilter<"Message"> | string | null
     createdAt?: DateTimeWithAggregatesFilter<"Message"> | Date | string
   }
@@ -15139,7 +15134,7 @@ export namespace Prisma {
   export type MessageCreateInput = {
     id?: string
     role: string
-    content: string
+    content: JsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     chat: ChatCreateNestedOneWithoutMessagesInput
     user?: UserCreateNestedOneWithoutMessagesInput
@@ -15154,7 +15149,7 @@ export namespace Prisma {
     chatId: string
     userId?: string | null
     role: string
-    content: string
+    content: JsonNullValueInput | InputJsonValue
     parentId?: string | null
     createdAt?: Date | string
     children?: MessageUncheckedCreateNestedManyWithoutParentInput
@@ -15165,7 +15160,7 @@ export namespace Prisma {
   export type MessageUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
     role?: StringFieldUpdateOperationsInput | string
-    content?: StringFieldUpdateOperationsInput | string
+    content?: JsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     chat?: ChatUpdateOneRequiredWithoutMessagesNestedInput
     user?: UserUpdateOneWithoutMessagesNestedInput
@@ -15180,7 +15175,7 @@ export namespace Prisma {
     chatId?: StringFieldUpdateOperationsInput | string
     userId?: NullableStringFieldUpdateOperationsInput | string | null
     role?: StringFieldUpdateOperationsInput | string
-    content?: StringFieldUpdateOperationsInput | string
+    content?: JsonNullValueInput | InputJsonValue
     parentId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     children?: MessageUncheckedUpdateManyWithoutParentNestedInput
@@ -15193,7 +15188,7 @@ export namespace Prisma {
     chatId: string
     userId?: string | null
     role: string
-    content: string
+    content: JsonNullValueInput | InputJsonValue
     parentId?: string | null
     createdAt?: Date | string
   }
@@ -15201,7 +15196,7 @@ export namespace Prisma {
   export type MessageUpdateManyMutationInput = {
     id?: StringFieldUpdateOperationsInput | string
     role?: StringFieldUpdateOperationsInput | string
-    content?: StringFieldUpdateOperationsInput | string
+    content?: JsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
@@ -15210,7 +15205,7 @@ export namespace Prisma {
     chatId?: StringFieldUpdateOperationsInput | string
     userId?: NullableStringFieldUpdateOperationsInput | string | null
     role?: StringFieldUpdateOperationsInput | string
-    content?: StringFieldUpdateOperationsInput | string
+    content?: JsonNullValueInput | InputJsonValue
     parentId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -16110,6 +16105,29 @@ export namespace Prisma {
     _min?: NestedDateTimeFilter<$PrismaModel>
     _max?: NestedDateTimeFilter<$PrismaModel>
   }
+  export type JsonFilter<$PrismaModel = never> =
+    | PatchUndefined<
+        Either<Required<JsonFilterBase<$PrismaModel>>, Exclude<keyof Required<JsonFilterBase<$PrismaModel>>, 'path'>>,
+        Required<JsonFilterBase<$PrismaModel>>
+      >
+    | OptionalFlat<Omit<Required<JsonFilterBase<$PrismaModel>>, 'path'>>
+
+  export type JsonFilterBase<$PrismaModel = never> = {
+    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+    path?: string
+    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
+    string_contains?: string | StringFieldRefInput<$PrismaModel>
+    string_starts_with?: string | StringFieldRefInput<$PrismaModel>
+    string_ends_with?: string | StringFieldRefInput<$PrismaModel>
+    array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    lt?: InputJsonValue
+    lte?: InputJsonValue
+    gt?: InputJsonValue
+    gte?: InputJsonValue
+    not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+  }
 
   export type ChatScalarRelationFilter = {
     is?: ChatWhereInput
@@ -16157,7 +16175,6 @@ export namespace Prisma {
     chatId?: SortOrder
     userId?: SortOrder
     role?: SortOrder
-    content?: SortOrder
     parentId?: SortOrder
     createdAt?: SortOrder
   }
@@ -16167,9 +16184,34 @@ export namespace Prisma {
     chatId?: SortOrder
     userId?: SortOrder
     role?: SortOrder
-    content?: SortOrder
     parentId?: SortOrder
     createdAt?: SortOrder
+  }
+  export type JsonWithAggregatesFilter<$PrismaModel = never> =
+    | PatchUndefined<
+        Either<Required<JsonWithAggregatesFilterBase<$PrismaModel>>, Exclude<keyof Required<JsonWithAggregatesFilterBase<$PrismaModel>>, 'path'>>,
+        Required<JsonWithAggregatesFilterBase<$PrismaModel>>
+      >
+    | OptionalFlat<Omit<Required<JsonWithAggregatesFilterBase<$PrismaModel>>, 'path'>>
+
+  export type JsonWithAggregatesFilterBase<$PrismaModel = never> = {
+    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+    path?: string
+    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
+    string_contains?: string | StringFieldRefInput<$PrismaModel>
+    string_starts_with?: string | StringFieldRefInput<$PrismaModel>
+    string_ends_with?: string | StringFieldRefInput<$PrismaModel>
+    array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    lt?: InputJsonValue
+    lte?: InputJsonValue
+    gt?: InputJsonValue
+    gte?: InputJsonValue
+    not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedJsonFilter<$PrismaModel>
+    _max?: NestedJsonFilter<$PrismaModel>
   }
   export type JsonNullableFilter<$PrismaModel = never> =
     | PatchUndefined<
@@ -16254,29 +16296,6 @@ export namespace Prisma {
     _min?: NestedJsonNullableFilter<$PrismaModel>
     _max?: NestedJsonNullableFilter<$PrismaModel>
   }
-  export type JsonFilter<$PrismaModel = never> =
-    | PatchUndefined<
-        Either<Required<JsonFilterBase<$PrismaModel>>, Exclude<keyof Required<JsonFilterBase<$PrismaModel>>, 'path'>>,
-        Required<JsonFilterBase<$PrismaModel>>
-      >
-    | OptionalFlat<Omit<Required<JsonFilterBase<$PrismaModel>>, 'path'>>
-
-  export type JsonFilterBase<$PrismaModel = never> = {
-    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
-    path?: string
-    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
-    string_contains?: string | StringFieldRefInput<$PrismaModel>
-    string_starts_with?: string | StringFieldRefInput<$PrismaModel>
-    string_ends_with?: string | StringFieldRefInput<$PrismaModel>
-    array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
-    array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
-    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
-    lt?: InputJsonValue
-    lte?: InputJsonValue
-    gt?: InputJsonValue
-    gte?: InputJsonValue
-    not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
-  }
 
   export type MessageAttachmentOrderByRelevanceInput = {
     fields: MessageAttachmentOrderByRelevanceFieldEnum | MessageAttachmentOrderByRelevanceFieldEnum[]
@@ -16304,32 +16323,6 @@ export namespace Prisma {
     messageId?: SortOrder
     type?: SortOrder
     createdAt?: SortOrder
-  }
-  export type JsonWithAggregatesFilter<$PrismaModel = never> =
-    | PatchUndefined<
-        Either<Required<JsonWithAggregatesFilterBase<$PrismaModel>>, Exclude<keyof Required<JsonWithAggregatesFilterBase<$PrismaModel>>, 'path'>>,
-        Required<JsonWithAggregatesFilterBase<$PrismaModel>>
-      >
-    | OptionalFlat<Omit<Required<JsonWithAggregatesFilterBase<$PrismaModel>>, 'path'>>
-
-  export type JsonWithAggregatesFilterBase<$PrismaModel = never> = {
-    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
-    path?: string
-    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
-    string_contains?: string | StringFieldRefInput<$PrismaModel>
-    string_starts_with?: string | StringFieldRefInput<$PrismaModel>
-    string_ends_with?: string | StringFieldRefInput<$PrismaModel>
-    array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
-    array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
-    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
-    lt?: InputJsonValue
-    lte?: InputJsonValue
-    gt?: InputJsonValue
-    gte?: InputJsonValue
-    not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
-    _count?: NestedIntFilter<$PrismaModel>
-    _min?: NestedJsonFilter<$PrismaModel>
-    _max?: NestedJsonFilter<$PrismaModel>
   }
 
   export type BoolFilter<$PrismaModel = never> = {
@@ -17634,14 +17627,14 @@ export namespace Prisma {
     _min?: NestedDateTimeFilter<$PrismaModel>
     _max?: NestedDateTimeFilter<$PrismaModel>
   }
-  export type NestedJsonNullableFilter<$PrismaModel = never> =
+  export type NestedJsonFilter<$PrismaModel = never> =
     | PatchUndefined<
-        Either<Required<NestedJsonNullableFilterBase<$PrismaModel>>, Exclude<keyof Required<NestedJsonNullableFilterBase<$PrismaModel>>, 'path'>>,
-        Required<NestedJsonNullableFilterBase<$PrismaModel>>
+        Either<Required<NestedJsonFilterBase<$PrismaModel>>, Exclude<keyof Required<NestedJsonFilterBase<$PrismaModel>>, 'path'>>,
+        Required<NestedJsonFilterBase<$PrismaModel>>
       >
-    | OptionalFlat<Omit<Required<NestedJsonNullableFilterBase<$PrismaModel>>, 'path'>>
+    | OptionalFlat<Omit<Required<NestedJsonFilterBase<$PrismaModel>>, 'path'>>
 
-  export type NestedJsonNullableFilterBase<$PrismaModel = never> = {
+  export type NestedJsonFilterBase<$PrismaModel = never> = {
     equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
     path?: string
     mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
@@ -17657,14 +17650,14 @@ export namespace Prisma {
     gte?: InputJsonValue
     not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
   }
-  export type NestedJsonFilter<$PrismaModel = never> =
+  export type NestedJsonNullableFilter<$PrismaModel = never> =
     | PatchUndefined<
-        Either<Required<NestedJsonFilterBase<$PrismaModel>>, Exclude<keyof Required<NestedJsonFilterBase<$PrismaModel>>, 'path'>>,
-        Required<NestedJsonFilterBase<$PrismaModel>>
+        Either<Required<NestedJsonNullableFilterBase<$PrismaModel>>, Exclude<keyof Required<NestedJsonNullableFilterBase<$PrismaModel>>, 'path'>>,
+        Required<NestedJsonNullableFilterBase<$PrismaModel>>
       >
-    | OptionalFlat<Omit<Required<NestedJsonFilterBase<$PrismaModel>>, 'path'>>
+    | OptionalFlat<Omit<Required<NestedJsonNullableFilterBase<$PrismaModel>>, 'path'>>
 
-  export type NestedJsonFilterBase<$PrismaModel = never> = {
+  export type NestedJsonNullableFilterBase<$PrismaModel = never> = {
     equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
     path?: string
     mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
@@ -17822,7 +17815,7 @@ export namespace Prisma {
   export type MessageCreateWithoutChatInput = {
     id?: string
     role: string
-    content: string
+    content: JsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     user?: UserCreateNestedOneWithoutMessagesInput
     parent?: MessageCreateNestedOneWithoutChildrenInput
@@ -17835,7 +17828,7 @@ export namespace Prisma {
     id?: string
     userId?: string | null
     role: string
-    content: string
+    content: JsonNullValueInput | InputJsonValue
     parentId?: string | null
     createdAt?: Date | string
     children?: MessageUncheckedCreateNestedManyWithoutParentInput
@@ -17922,7 +17915,7 @@ export namespace Prisma {
     chatId?: StringFilter<"Message"> | string
     userId?: StringNullableFilter<"Message"> | string | null
     role?: StringFilter<"Message"> | string
-    content?: StringFilter<"Message"> | string
+    content?: JsonFilter<"Message">
     parentId?: StringNullableFilter<"Message"> | string | null
     createdAt?: DateTimeFilter<"Message"> | Date | string
   }
@@ -17992,7 +17985,7 @@ export namespace Prisma {
   export type MessageCreateWithoutChildrenInput = {
     id?: string
     role: string
-    content: string
+    content: JsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     chat: ChatCreateNestedOneWithoutMessagesInput
     user?: UserCreateNestedOneWithoutMessagesInput
@@ -18006,7 +17999,7 @@ export namespace Prisma {
     chatId: string
     userId?: string | null
     role: string
-    content: string
+    content: JsonNullValueInput | InputJsonValue
     parentId?: string | null
     createdAt?: Date | string
     modelInfo?: MessageModelInfoUncheckedCreateNestedOneWithoutMessageInput
@@ -18021,7 +18014,7 @@ export namespace Prisma {
   export type MessageCreateWithoutParentInput = {
     id?: string
     role: string
-    content: string
+    content: JsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     chat: ChatCreateNestedOneWithoutMessagesInput
     user?: UserCreateNestedOneWithoutMessagesInput
@@ -18035,7 +18028,7 @@ export namespace Prisma {
     chatId: string
     userId?: string | null
     role: string
-    content: string
+    content: JsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     children?: MessageUncheckedCreateNestedManyWithoutParentInput
     modelInfo?: MessageModelInfoUncheckedCreateNestedOneWithoutMessageInput
@@ -18185,7 +18178,7 @@ export namespace Prisma {
   export type MessageUpdateWithoutChildrenInput = {
     id?: StringFieldUpdateOperationsInput | string
     role?: StringFieldUpdateOperationsInput | string
-    content?: StringFieldUpdateOperationsInput | string
+    content?: JsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     chat?: ChatUpdateOneRequiredWithoutMessagesNestedInput
     user?: UserUpdateOneWithoutMessagesNestedInput
@@ -18199,7 +18192,7 @@ export namespace Prisma {
     chatId?: StringFieldUpdateOperationsInput | string
     userId?: NullableStringFieldUpdateOperationsInput | string | null
     role?: StringFieldUpdateOperationsInput | string
-    content?: StringFieldUpdateOperationsInput | string
+    content?: JsonNullValueInput | InputJsonValue
     parentId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     modelInfo?: MessageModelInfoUncheckedUpdateOneWithoutMessageNestedInput
@@ -18279,7 +18272,7 @@ export namespace Prisma {
   export type MessageCreateWithoutModelInfoInput = {
     id?: string
     role: string
-    content: string
+    content: JsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     chat: ChatCreateNestedOneWithoutMessagesInput
     user?: UserCreateNestedOneWithoutMessagesInput
@@ -18293,7 +18286,7 @@ export namespace Prisma {
     chatId: string
     userId?: string | null
     role: string
-    content: string
+    content: JsonNullValueInput | InputJsonValue
     parentId?: string | null
     createdAt?: Date | string
     children?: MessageUncheckedCreateNestedManyWithoutParentInput
@@ -18319,7 +18312,7 @@ export namespace Prisma {
   export type MessageUpdateWithoutModelInfoInput = {
     id?: StringFieldUpdateOperationsInput | string
     role?: StringFieldUpdateOperationsInput | string
-    content?: StringFieldUpdateOperationsInput | string
+    content?: JsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     chat?: ChatUpdateOneRequiredWithoutMessagesNestedInput
     user?: UserUpdateOneWithoutMessagesNestedInput
@@ -18333,7 +18326,7 @@ export namespace Prisma {
     chatId?: StringFieldUpdateOperationsInput | string
     userId?: NullableStringFieldUpdateOperationsInput | string | null
     role?: StringFieldUpdateOperationsInput | string
-    content?: StringFieldUpdateOperationsInput | string
+    content?: JsonNullValueInput | InputJsonValue
     parentId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     children?: MessageUncheckedUpdateManyWithoutParentNestedInput
@@ -18343,7 +18336,7 @@ export namespace Prisma {
   export type MessageCreateWithoutAttachmentsInput = {
     id?: string
     role: string
-    content: string
+    content: JsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     chat: ChatCreateNestedOneWithoutMessagesInput
     user?: UserCreateNestedOneWithoutMessagesInput
@@ -18357,7 +18350,7 @@ export namespace Prisma {
     chatId: string
     userId?: string | null
     role: string
-    content: string
+    content: JsonNullValueInput | InputJsonValue
     parentId?: string | null
     createdAt?: Date | string
     children?: MessageUncheckedCreateNestedManyWithoutParentInput
@@ -18383,7 +18376,7 @@ export namespace Prisma {
   export type MessageUpdateWithoutAttachmentsInput = {
     id?: StringFieldUpdateOperationsInput | string
     role?: StringFieldUpdateOperationsInput | string
-    content?: StringFieldUpdateOperationsInput | string
+    content?: JsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     chat?: ChatUpdateOneRequiredWithoutMessagesNestedInput
     user?: UserUpdateOneWithoutMessagesNestedInput
@@ -18397,7 +18390,7 @@ export namespace Prisma {
     chatId?: StringFieldUpdateOperationsInput | string
     userId?: NullableStringFieldUpdateOperationsInput | string | null
     role?: StringFieldUpdateOperationsInput | string
-    content?: StringFieldUpdateOperationsInput | string
+    content?: JsonNullValueInput | InputJsonValue
     parentId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     children?: MessageUncheckedUpdateManyWithoutParentNestedInput
@@ -18614,7 +18607,7 @@ export namespace Prisma {
   export type MessageCreateWithoutUserInput = {
     id?: string
     role: string
-    content: string
+    content: JsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     chat: ChatCreateNestedOneWithoutMessagesInput
     parent?: MessageCreateNestedOneWithoutChildrenInput
@@ -18627,7 +18620,7 @@ export namespace Prisma {
     id?: string
     chatId: string
     role: string
-    content: string
+    content: JsonNullValueInput | InputJsonValue
     parentId?: string | null
     createdAt?: Date | string
     children?: MessageUncheckedCreateNestedManyWithoutParentInput
@@ -19383,7 +19376,7 @@ export namespace Prisma {
     id?: string
     userId?: string | null
     role: string
-    content: string
+    content: JsonNullValueInput | InputJsonValue
     parentId?: string | null
     createdAt?: Date | string
   }
@@ -19391,7 +19384,7 @@ export namespace Prisma {
   export type MessageUpdateWithoutChatInput = {
     id?: StringFieldUpdateOperationsInput | string
     role?: StringFieldUpdateOperationsInput | string
-    content?: StringFieldUpdateOperationsInput | string
+    content?: JsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     user?: UserUpdateOneWithoutMessagesNestedInput
     parent?: MessageUpdateOneWithoutChildrenNestedInput
@@ -19404,7 +19397,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     userId?: NullableStringFieldUpdateOperationsInput | string | null
     role?: StringFieldUpdateOperationsInput | string
-    content?: StringFieldUpdateOperationsInput | string
+    content?: JsonNullValueInput | InputJsonValue
     parentId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     children?: MessageUncheckedUpdateManyWithoutParentNestedInput
@@ -19416,7 +19409,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     userId?: NullableStringFieldUpdateOperationsInput | string | null
     role?: StringFieldUpdateOperationsInput | string
-    content?: StringFieldUpdateOperationsInput | string
+    content?: JsonNullValueInput | InputJsonValue
     parentId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -19426,7 +19419,7 @@ export namespace Prisma {
     chatId: string
     userId?: string | null
     role: string
-    content: string
+    content: JsonNullValueInput | InputJsonValue
     createdAt?: Date | string
   }
 
@@ -19440,7 +19433,7 @@ export namespace Prisma {
   export type MessageUpdateWithoutParentInput = {
     id?: StringFieldUpdateOperationsInput | string
     role?: StringFieldUpdateOperationsInput | string
-    content?: StringFieldUpdateOperationsInput | string
+    content?: JsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     chat?: ChatUpdateOneRequiredWithoutMessagesNestedInput
     user?: UserUpdateOneWithoutMessagesNestedInput
@@ -19454,7 +19447,7 @@ export namespace Prisma {
     chatId?: StringFieldUpdateOperationsInput | string
     userId?: NullableStringFieldUpdateOperationsInput | string | null
     role?: StringFieldUpdateOperationsInput | string
-    content?: StringFieldUpdateOperationsInput | string
+    content?: JsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     children?: MessageUncheckedUpdateManyWithoutParentNestedInput
     modelInfo?: MessageModelInfoUncheckedUpdateOneWithoutMessageNestedInput
@@ -19466,7 +19459,7 @@ export namespace Prisma {
     chatId?: StringFieldUpdateOperationsInput | string
     userId?: NullableStringFieldUpdateOperationsInput | string | null
     role?: StringFieldUpdateOperationsInput | string
-    content?: StringFieldUpdateOperationsInput | string
+    content?: JsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
@@ -19552,7 +19545,7 @@ export namespace Prisma {
     id?: string
     chatId: string
     role: string
-    content: string
+    content: JsonNullValueInput | InputJsonValue
     parentId?: string | null
     createdAt?: Date | string
   }
@@ -19733,7 +19726,7 @@ export namespace Prisma {
   export type MessageUpdateWithoutUserInput = {
     id?: StringFieldUpdateOperationsInput | string
     role?: StringFieldUpdateOperationsInput | string
-    content?: StringFieldUpdateOperationsInput | string
+    content?: JsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     chat?: ChatUpdateOneRequiredWithoutMessagesNestedInput
     parent?: MessageUpdateOneWithoutChildrenNestedInput
@@ -19746,7 +19739,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     chatId?: StringFieldUpdateOperationsInput | string
     role?: StringFieldUpdateOperationsInput | string
-    content?: StringFieldUpdateOperationsInput | string
+    content?: JsonNullValueInput | InputJsonValue
     parentId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     children?: MessageUncheckedUpdateManyWithoutParentNestedInput
@@ -19758,7 +19751,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     chatId?: StringFieldUpdateOperationsInput | string
     role?: StringFieldUpdateOperationsInput | string
-    content?: StringFieldUpdateOperationsInput | string
+    content?: JsonNullValueInput | InputJsonValue
     parentId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }

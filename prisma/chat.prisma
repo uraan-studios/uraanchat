@@ -22,7 +22,7 @@ model Message {
   user           User?      @relation(fields: [userId], references: [id], onDelete: SetNull)
 
   role           String     // "user", "assistant", "system"
-  content        String     @db.Text
+  content        Json
 
   parentId       String?    // for branching
   parent         Message?   @relation("MessageParent", fields: [parentId], references: [id])
