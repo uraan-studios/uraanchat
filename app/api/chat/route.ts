@@ -1,35 +1,62 @@
 // app/api/chat/route.ts
+import { createOpenRouter } from "@openrouter/ai-sdk-provider";
+import { streamText, CoreMessage } from "ai";
+import { NextRequest, NextResponse } from "next/server";
 
-import { google } from '@ai-sdk/google';
-import { streamText, Message } from 'ai';
-import { NextResponse } from 'next/server';
-import { z } from 'zod';
+// Use the edge runtime for best streaming performance
+export const runtime = "edge";
 
-export const runtime = 'edge'; // Optional: switch to 'nodejs' if local-only
+// Initialize the OpenRouter provider with the API key from environment variables
+const openrouter = createOpenRouter({
+  apiKey: process.env.OPENROUTER_API_KEY!,
+});
 
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
+    // Ensure messages and model are present in the request body
+    const { messages, model }: { messages: CoreMessage[]; model: string } =
+      body;
 
-    const schema = z.object({
-      messages: z.array(
-        z.object({
-          role: z.enum(['user', 'assistant']),
-          content: z.string(),
-        })
-      ),
-    });
+    if (!model) {
+      return new Response(JSON.stringify({ error: "Model is required" }), {
+        status: 400,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
 
-    const { messages } = schema.parse(body);
+    if (!messages || messages.length === 0) {
+      return new Response(
+        JSON.stringify({ error: "Messages are required" }),
+        {
+          status: 400,
+          headers: { "Content-Type": "application/json" },
+        }
+      );
+    }
 
+    // Get the specific model from the provider
+    const chatModel = openrouter.chat(model);
+
+    // Call the streamText function with the model and messages
     const result = await streamText({
-      model: google('gemini-1.5-flash'), // Use latest or correct model name
+      model: chatModel,
       messages,
     });
 
-    return result.toDataStreamResponse();
-  } catch (error: any) {
-    console.error('Chat API error:', error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    // Return the stream as a Data Stream response
+    return result.toDataStreamResponse({
+      sendReasoning: true,
+      sendSources: true,
+    });
+  } catch (error) {
+    // Generic error handling
+    console.error(error);
+    const errorMessage =
+      error instanceof Error ? error.message : "An unknown error occurred";
+    return new NextResponse(JSON.stringify({ error: errorMessage }), {
+      status: 500,
+      headers: { "Content-Type": "application/json" },
+    });
   }
 }

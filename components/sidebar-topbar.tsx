@@ -8,7 +8,7 @@ const SidebarTopbar = () => {
   const { state } = useSidebar()
 
   return (
-    <div className="bg-sidebar rounded-md fixed top-2 left-2 z-10 flex items-center gap-1 pl-1 h-9">
+    <div className="bg-sidebar rounded-md fixed top-2 left-2 z-10 flex items-center gap-1 px-1 h-9">
       <SidebarTrigger />
 
       <AnimatePresence initial={false}>

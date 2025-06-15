@@ -1,7 +1,7 @@
 // app/chat/components/ChatInput.tsx
 'use client';
 
-import React, { useRef, useState, KeyboardEvent } from 'react';
+import React, { useRef, KeyboardEvent } from 'react';
 import { Button } from '@/components/ui/button';
 import {
   Send,
@@ -14,9 +14,10 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 
-interface Attachment {
+// The Attachment type can be defined here or in a shared types file
+export interface Attachment {
   id: string;
-  key?: string;
+  key: string; // Key is now required after upload
   name: string;
   size: number;
   type: string;
@@ -28,13 +29,16 @@ interface ChatInputProps {
   handleInputChange: (
     e:
       | React.ChangeEvent<HTMLInputElement>
-      | React.ChangeEvent<HTMLTextAreaElement>
+      | React.ChangeEvent<HTMLTextAreaElement>,
   ) => void;
   handleSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
   isLoading: boolean;
   randomPrompt: () => void;
   lorem: () => void;
   idea: () => void;
+  // New props for managing attachments from the parent
+  attachments: Attachment[];
+  setAttachments: React.Dispatch<React.SetStateAction<Attachment[]>>;
 }
 
 export function ChatInput({
@@ -45,15 +49,17 @@ export function ChatInput({
   randomPrompt,
   lorem,
   idea,
+  attachments,
+  setAttachments, // Receive state and setter from parent
 }: ChatInputProps) {
   const textRef = useRef<HTMLTextAreaElement | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
-  const [attachments, setAttachments] = useState<Attachment[]>([]);
 
   const onKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
-      if (input.trim()) handleSubmit(e as any);
+      // Allow submission if there's text OR attachments
+      if (input.trim() || attachments.length > 0) handleSubmit(e as any);
     }
   };
 
@@ -61,29 +67,28 @@ export function ChatInput({
     const t = e.currentTarget;
     const lineHeight = 20;
     const max = 15 * lineHeight;
-
     t.style.height = 'auto';
-    t.style.height = Math.min(t.scrollHeight, max) + 'px';
+    t.style.height = `${Math.min(t.scrollHeight, max)}px`;
   };
 
   const triggerFileSelect = () => {
     if (attachments.length >= 3) {
-      toast("Maximum of 3 attachments allowed");
+      toast('Maximum of 3 attachments allowed');
       return;
     }
     fileInputRef.current?.click();
   };
 
   const handleFileChange = async (
-    e: React.ChangeEvent<HTMLInputElement>
+    e: React.ChangeEvent<HTMLInputElement>,
   ) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Create a temporary attachment object and add it to state immediately.
     const tempId = Date.now().toString();
     const newAttachment: Attachment = {
       id: tempId,
+      key: '', // Key is initially empty
       name: file.name,
       size: file.size,
       type: file.type,
@@ -92,7 +97,6 @@ export function ChatInput({
     setAttachments((prev) => [...prev, newAttachment]);
 
     try {
-      // Step 1: Get pre-signed URL and key by calling /api/upload
       const uploadInitResp = await fetch('/api/upload', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -102,67 +106,37 @@ export function ChatInput({
           fileType: file.type,
         }),
       });
-
-      if (!uploadInitResp.ok) {
-        const message = (await uploadInitResp.json()).error;
-        throw new Error(message || 'Failed to get upload URL');
-      }
-
+      if (!uploadInitResp.ok) throw new Error('Failed to get upload URL');
       const { url, key } = await uploadInitResp.json();
 
-      // Step 2: Upload file to the pre-signed URL
       const uploadResp = await fetch(url, {
         method: 'PUT',
         headers: { 'Content-Type': file.type },
         body: file,
       });
+      if (!uploadResp.ok) throw new Error('File upload failed');
 
-      if (!uploadResp.ok) {
-        throw new Error('File upload failed');
-      }
-
-      // Step 3: Confirm upload via /api/upload/confirm endpoint
-      const confirmResp = await fetch('/api/upload/confirm', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          key,
-          size: file.size,
-          name: file.name,
-          type: file.type,
-          // tags: [] // add tags if necessary
-        }),
-      });
-
-      if (!confirmResp.ok) {
-        const message = (await confirmResp.json()).error;
-        throw new Error(message || 'Failed to confirm upload');
-      }
-
-      // Step 4: Update the attachment to mark it as complete.
+      // No need for a separate confirm step if the key is returned in step 1
       setAttachments((prev) =>
         prev.map((att) =>
-          att.id === tempId ? { ...att, key, isUploading: false } : att
-        )
+          att.id === tempId ? { ...att, key, isUploading: false } : att,
+        ),
       );
-      toast("File uploaded successfully");
+      toast('File uploaded successfully');
     } catch (error: any) {
-      // Remove the temporary attachment in case of failure.
-      setAttachments((prev) =>
-        prev.filter((att) => att.id !== tempId)
-      );
-      toast("Failed to upload file");
+      setAttachments((prev) => prev.filter((att) => att.id !== tempId));
+      toast.error('Failed to upload file: ' + error.message);
     } finally {
-      // Reset file input so the same file can be selected again if needed.
-      if (fileInputRef.current) {
-        fileInputRef.current.value = '';
-      }
+      if (fileInputRef.current) fileInputRef.current.value = '';
     }
   };
 
   const removeAttachment = (id: string) => {
     setAttachments((prev) => prev.filter((att) => att.id !== id));
   };
+
+  // A message is submittable if it's not loading and has text OR attachments
+  const canSubmit = !isLoading && (input.trim().length > 0 || attachments.length > 0);
 
   return (
     <div className="w-full bg-gray-50 dark:bg-gray-900/40 py-3">
@@ -186,7 +160,7 @@ export function ChatInput({
                       variant="ghost"
                       onClick={() => removeAttachment(att.id)}
                       title="Remove attachment"
-                      className="p-0"
+                      className="p-0 h-4 w-4"
                     >
                       <X className="w-3 h-3" />
                     </Button>
@@ -210,63 +184,27 @@ export function ChatInput({
 
           <div className="flex items-center justify-between border-t dark:border-gray-700 px-3 py-2">
             <div className="flex gap-2">
-              <Button
-                type="button"
-                size="icon"
-                variant="ghost"
-                onClick={randomPrompt}
-                title="Random example prompt"
-              >
+              <Button type="button" size="icon" variant="ghost" onClick={randomPrompt} title="Random example prompt">
                 <Dice3 className="w-4 h-4" />
               </Button>
-              <Button
-                type="button"
-                size="icon"
-                variant="ghost"
-                onClick={lorem}
-                title="Add lorem ipsum"
-              >
+              <Button type="button" size="icon" variant="ghost" onClick={lorem} title="Add lorem ipsum">
                 <Sparkles className="w-4 h-4" />
               </Button>
-              <Button
-                type="button"
-                size="icon"
-                variant="ghost"
-                onClick={idea}
-                title="Creative idea"
-              >
+              <Button type="button" size="icon" variant="ghost" onClick={idea} title="Creative idea">
                 <Lightbulb className="w-4 h-4" />
               </Button>
-              {/* Attachment Button */}
-              <Button
-                type="button"
-                size="icon"
-                variant="ghost"
-                onClick={triggerFileSelect}
-                title="Attach a file"
-                disabled={attachments.length >= 3}
-              >
+              <Button type="button" size="icon" variant="ghost" onClick={triggerFileSelect} title="Attach a file" disabled={attachments.length >= 3 || isLoading}>
                 <Paperclip className="w-4 h-4" />
               </Button>
             </div>
 
-            <Button
-              type="submit"
-              disabled={isLoading || !input.trim()}
-              className="rounded-full w-10 h-10 p-0 shrink-0"
-            >
+            <Button type="submit" disabled={!canSubmit} className="rounded-full w-10 h-10 p-0 shrink-0">
               <Send className="w-5 h-5" />
             </Button>
           </div>
         </div>
       </form>
-      {/* Hidden file input */}
-      <input
-        ref={fileInputRef}
-        type="file"
-        hidden
-        onChange={handleFileChange}
-      />
+      <input ref={fileInputRef} type="file" hidden onChange={handleFileChange} />
     </div>
   );
 }
