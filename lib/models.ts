@@ -45,4 +45,9 @@ export const MODELS = [
     name: 'OpenAI: o3 Mini',
     supports: ['document'],
   },
+  {
+    id: 'openai/gpt-4.1-2025-04-14',
+    name: 'OpenAI: GPT 4.1',
+    supports: ['document'],
+  },
 ];

@@ -1,8 +1,10 @@
 // app/api/chat/route.ts
+import { SYSTEM_MESSAGE } from "@/constants/system";
 import { auth } from "@/lib/auth";
 import db from "@/lib/db";
 import { createOpenRouter } from "@openrouter/ai-sdk-provider";
 import { streamText, CoreMessage } from "ai";
+import { Settings } from "lucide-react";
 import { NextRequest, NextResponse } from "next/server";
 
 // Optional: Use edge runtime for lower latency
@@ -66,11 +68,25 @@ export async function POST(req: NextRequest) {
       });
     }
 
+    
+
     // Stream LLM response
-    const chatModel = openrouter.chat(model);
+    const chatModel = openrouter.chat(model, {
+      reasoning: {
+        effort: "high",
+      },
+      user: userId,
+      usage: {
+        include: true
+      },
+      
+
+      });
     const result = await streamText({
       model: chatModel,
       messages,
+      system: SYSTEM_MESSAGE,
+
       async onFinish(result) {
         try {
           const assistantMessage = result.response.messages[0];
