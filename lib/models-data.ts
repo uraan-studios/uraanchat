@@ -66,14 +66,14 @@ export const aiModels = [
   },
   {
     modelName: "Grok 3 Beta",
-    company: "Mistral",
+    company: "xAI",
     features: ["text", "code"],
     logo: "/grok-logo.png",
     icons: ["T", "C"],
   },
   {
     modelName: "Grok 3 Mini Beta",
-    company: "Mistral",
+    company: "xAI",
     features: ["text", "code"],
     logo: "/grok-logo.png",
     icons: ["T", "C"],
