@@ -1,0 +1,81 @@
+// lib/models-data.ts
+
+export const aiModels = [
+  {
+    modelName: "Claude 3.5 Sonnet",
+    company: "Anthropic",
+    features: ["text", "code", "vision"],
+    logo: "/claude-logo.png",
+    icons: ["T", "C", "V"],
+  },
+  {
+    modelName: "Claude 3.7 Sonnet",
+    company: "Anthropic",
+    features: ["text", "code", "vision"],
+    logo: "/claude-logo.png",
+    icons: ["T", "C", "V"],
+  },
+  {
+    modelName: "Claude Opus 4",
+    company: "Anthropic",
+    features: ["text", "code", "vision"],
+    logo: "/claude-logo.png",
+    icons: ["T", "C", "V"],
+  },
+  {
+    modelName: "Claude Sonnet 4",
+    company: "Anthropic",
+    features: ["text", "code", "vision"],
+    logo: "/claude-logo.png",
+    icons: ["T", "C", "V"],
+  },
+  {
+    modelName: "Deepseek Chat V3 0324-Free",
+    company: "Deepseek",
+    features: ["text"],
+    logo: "/deepseek-logo.png",
+    icons: ["T"],
+  },
+  {
+    modelName: "Deepseek R1 0528-Free",
+    company: "Deepseek",
+    features: ["text"],
+    logo: "/deepseek-logo.png",
+    icons: ["T"],
+  },
+  {
+    modelName: "Gemini 1.5 Pro",
+    company: "Google",
+    features: ["text", "vision", "code"],
+    logo: "/gemini-logo.png",
+    icons: ["T", "V", "C"],
+  },
+  {
+    modelName: "GPT-4o",
+    company: "OpenAI",
+    features: ["text", "vision", "code", "voice"],
+    logo: "/openai-logo.png",
+    icons: ["T", "V", "C", "🗣️"],
+  },
+  {
+    modelName: "GPT-3.5 Turbo",
+    company: "OpenAI",
+    features: ["text", "code"],
+    logo: "/openai-logo.png",
+    icons: ["T", "C"],
+  },
+  {
+    modelName: "Grok 3 Beta",
+    company: "xAI",
+    features: ["text", "code"],
+    logo: "/grok-logo.png",
+    icons: ["T", "C"],
+  },
+  {
+    modelName: "Grok 3 Mini Beta",
+    company: "xAI",
+    features: ["text", "code"],
+    logo: "/grok-logo.png",
+    icons: ["T", "C"],
+  },
+];
