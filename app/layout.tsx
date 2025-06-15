@@ -5,6 +5,7 @@ import './globals.css';
 
 import { ThemeProvider } from '@/components/theme-provider';
 import { Providers } from './providers';
+import { Toaster } from '@/components/ui/sonner';
 
 /* ────────────────────  GOOGLE FONTS  ──────────────────── */
 
@@ -39,7 +40,7 @@ export default function RootLayout({
           <Providers>
             {children}
           </Providers>
-        
+        <Toaster/>
       </body>
     </html>
   );

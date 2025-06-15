@@ -1,0 +1,13 @@
+model File {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  name      String
+  size      Int
+  key       String   @unique
+  type      String
+  createdAt DateTime @default(now())
+  
+
+  @@index([userId])
+}

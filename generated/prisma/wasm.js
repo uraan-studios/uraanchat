@@ -166,6 +166,16 @@ exports.Prisma.VerificationScalarFieldEnum = {
   updatedAt: 'updatedAt'
 };
 
+exports.Prisma.FileScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  name: 'name',
+  size: 'size',
+  key: 'key',
+  type: 'type',
+  createdAt: 'createdAt'
+};
+
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -209,12 +219,21 @@ exports.Prisma.VerificationOrderByRelevanceFieldEnum = {
   value: 'value'
 };
 
+exports.Prisma.FileOrderByRelevanceFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  name: 'name',
+  key: 'key',
+  type: 'type'
+};
+
 
 exports.Prisma.ModelName = {
   User: 'User',
   Session: 'Session',
   Account: 'Account',
-  Verification: 'Verification'
+  Verification: 'Verification',
+  File: 'File'
 };
 
 /**

@@ -24,6 +24,8 @@ model User {
   sessions      Session[]
   accounts      Account[]
 
+  File File[]
+
   @@unique([email])
   @@map("user")
 }
