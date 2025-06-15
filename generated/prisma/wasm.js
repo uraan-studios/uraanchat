@@ -120,6 +120,42 @@ exports.Prisma.TransactionIsolationLevel = makeStrictEnum({
   Serializable: 'Serializable'
 });
 
+exports.Prisma.ChatScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  title: 'title',
+  rootMessage: 'rootMessage',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.MessageScalarFieldEnum = {
+  id: 'id',
+  chatId: 'chatId',
+  userId: 'userId',
+  role: 'role',
+  content: 'content',
+  parentId: 'parentId',
+  createdAt: 'createdAt'
+};
+
+exports.Prisma.MessageModelInfoScalarFieldEnum = {
+  id: 'id',
+  messageId: 'messageId',
+  modelName: 'modelName',
+  sources: 'sources',
+  metadata: 'metadata',
+  createdAt: 'createdAt'
+};
+
+exports.Prisma.MessageAttachmentScalarFieldEnum = {
+  id: 'id',
+  messageId: 'messageId',
+  type: 'type',
+  data: 'data',
+  createdAt: 'createdAt'
+};
+
 exports.Prisma.UserScalarFieldEnum = {
   id: 'id',
   name: 'name',
@@ -166,6 +202,37 @@ exports.Prisma.VerificationScalarFieldEnum = {
   updatedAt: 'updatedAt'
 };
 
+exports.Prisma.SubscriptionScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  plan: 'plan',
+  isActive: 'isActive',
+  startedAt: 'startedAt',
+  expiresAt: 'expiresAt',
+  canceled: 'canceled',
+  regularLimit: 'regularLimit',
+  premiumLimit: 'premiumLimit',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.PromptUsageScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  type: 'type',
+  createdAt: 'createdAt',
+  expiresAt: 'expiresAt'
+};
+
+exports.Prisma.MessageTokenScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  token: 'token',
+  createdAt: 'createdAt',
+  expiresAt: 'expiresAt',
+  type: 'type'
+};
+
 exports.Prisma.FileScalarFieldEnum = {
   id: 'id',
   userId: 'userId',
@@ -181,9 +248,57 @@ exports.Prisma.SortOrder = {
   desc: 'desc'
 };
 
+exports.Prisma.NullableJsonNullValueInput = {
+  DbNull: Prisma.DbNull,
+  JsonNull: Prisma.JsonNull
+};
+
+exports.Prisma.JsonNullValueInput = {
+  JsonNull: Prisma.JsonNull
+};
+
 exports.Prisma.NullsOrder = {
   first: 'first',
   last: 'last'
+};
+
+exports.Prisma.ChatOrderByRelevanceFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  title: 'title',
+  rootMessage: 'rootMessage'
+};
+
+exports.Prisma.MessageOrderByRelevanceFieldEnum = {
+  id: 'id',
+  chatId: 'chatId',
+  userId: 'userId',
+  role: 'role',
+  content: 'content',
+  parentId: 'parentId'
+};
+
+exports.Prisma.JsonNullValueFilter = {
+  DbNull: Prisma.DbNull,
+  JsonNull: Prisma.JsonNull,
+  AnyNull: Prisma.AnyNull
+};
+
+exports.Prisma.QueryMode = {
+  default: 'default',
+  insensitive: 'insensitive'
+};
+
+exports.Prisma.MessageModelInfoOrderByRelevanceFieldEnum = {
+  id: 'id',
+  messageId: 'messageId',
+  modelName: 'modelName'
+};
+
+exports.Prisma.MessageAttachmentOrderByRelevanceFieldEnum = {
+  id: 'id',
+  messageId: 'messageId',
+  type: 'type'
 };
 
 exports.Prisma.UserOrderByRelevanceFieldEnum = {
@@ -219,6 +334,23 @@ exports.Prisma.VerificationOrderByRelevanceFieldEnum = {
   value: 'value'
 };
 
+exports.Prisma.SubscriptionOrderByRelevanceFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  plan: 'plan'
+};
+
+exports.Prisma.PromptUsageOrderByRelevanceFieldEnum = {
+  id: 'id',
+  userId: 'userId'
+};
+
+exports.Prisma.MessageTokenOrderByRelevanceFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  token: 'token'
+};
+
 exports.Prisma.FileOrderByRelevanceFieldEnum = {
   id: 'id',
   userId: 'userId',
@@ -226,13 +358,28 @@ exports.Prisma.FileOrderByRelevanceFieldEnum = {
   key: 'key',
   type: 'type'
 };
+exports.PromptType = exports.$Enums.PromptType = {
+  REGULAR: 'REGULAR',
+  PREMIUM: 'PREMIUM'
+};
 
+exports.TokenType = exports.$Enums.TokenType = {
+  PROMPT: 'PROMPT',
+  COMPLETION: 'COMPLETION'
+};
 
 exports.Prisma.ModelName = {
+  Chat: 'Chat',
+  Message: 'Message',
+  MessageModelInfo: 'MessageModelInfo',
+  MessageAttachment: 'MessageAttachment',
   User: 'User',
   Session: 'Session',
   Account: 'Account',
   Verification: 'Verification',
+  Subscription: 'Subscription',
+  PromptUsage: 'PromptUsage',
+  MessageToken: 'MessageToken',
   File: 'File'
 };
 

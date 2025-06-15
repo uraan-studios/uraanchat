@@ -1,0 +1,58 @@
+model Chat {
+  id           String     @id @default(cuid())
+  userId       String?
+  user         User?      @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  title        String     @default("New Chat")
+  rootMessage  String?    // points to the first message ID (root)
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  messages     Message[]
+
+  @@index([userId])
+}
+
+model Message {
+  id             String     @id @default(cuid())
+  chatId         String
+  chat           Chat       @relation(fields: [chatId], references: [id], onDelete: Cascade)
+
+  userId         String?    // optional sender
+  user           User?      @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  role           String     // "user", "assistant", "system"
+  content        String     @db.Text
+
+  parentId       String?    // for branching
+  parent         Message?   @relation("MessageParent", fields: [parentId], references: [id])
+  children       Message[]  @relation("MessageParent")
+
+  createdAt      DateTime   @default(now())
+
+  modelInfo      MessageModelInfo?
+  attachments    MessageAttachment[]
+}
+
+model MessageModelInfo {
+  id         String   @id @default(cuid())
+  messageId  String   @unique
+  message    Message  @relation(fields: [messageId], references: [id], onDelete: Cascade)
+
+  modelName  String   // "gpt-4", "claude-3-opus", etc.
+  sources    Json?    // optional source data
+  metadata   Json?    // anything extra
+
+  createdAt  DateTime @default(now())
+}
+
+model MessageAttachment {
+  id         String   @id @default(cuid())
+  messageId  String
+  message    Message  @relation(fields: [messageId], references: [id], onDelete: Cascade)
+
+  type       String   // e.g. "file", "image", "code"
+  data       Json     // flexible for Vercel AI SDK-style attachments
+
+  createdAt  DateTime @default(now())
+}

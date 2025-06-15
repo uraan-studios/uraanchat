@@ -1,9 +1,13 @@
 // lib/models.ts
 export const MODELS = [
   {
-    id: 'meta-llama/llama-3.1-405b-instruct',
-    name: 'LLaMA 3.1',
-    supports: [],
+    id: 'meta-llama/llama-3.1-405b-instruct', // ID
+    name: 'LLaMA 3.1', // MODEL NAME
+    provider: 'huggingface', // COMPAMY
+    premium: false, // IF INPUT/output PRICE more then 2$ 
+    experimental: false, // likha hoga
+    onlyBYK: false, // if too expensive
+    supports: ['image', 'document', 'reasoning' ],
   },
   {
     id: 'mistralai/devstral-small',
