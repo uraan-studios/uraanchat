@@ -1,3 +1,62 @@
+model Chat {
+  id     String  @id @default(cuid())
+  userId String?
+  user   User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  title       String   @default("New Chat")
+  rootMessage String? // points to the first message ID (root)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  messages Message[]
+
+  @@index([userId])
+}
+
+model Message {
+  id     String @id @default(cuid())
+  chatId String
+  chat   Chat   @relation(fields: [chatId], references: [id], onDelete: Cascade)
+
+  userId String? // optional sender
+  user   User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  role    String // "user", "assistant", "system"
+  content Json
+
+  parentId String? // for branching
+  parent   Message?  @relation("MessageParent", fields: [parentId], references: [id])
+  children Message[] @relation("MessageParent")
+
+  createdAt DateTime @default(now())
+
+  modelInfo   MessageModelInfo?
+  attachments MessageAttachment[]
+}
+
+model MessageModelInfo {
+  id        String  @id @default(cuid())
+  messageId String  @unique
+  message   Message @relation(fields: [messageId], references: [id], onDelete: Cascade)
+
+  modelName String // "gpt-4", "claude-3-opus", etc.
+  sources   Json? // optional source data
+  metadata  Json? // anything extra
+
+  createdAt DateTime @default(now())
+}
+
+model MessageAttachment {
+  id        String  @id @default(cuid())
+  messageId String
+  message   Message @relation(fields: [messageId], references: [id], onDelete: Cascade)
+
+  type String // e.g. "file", "image", "code"
+  data Json // flexible for Vercel AI SDK-style attachments
+
+  createdAt DateTime @default(now())
+}
+
 // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
@@ -13,17 +72,24 @@ datasource db {
 }
 
 model User {
-  id            String    @id
-  name          String    @db.Text
+  id            String   @id
+  name          String   @db.Text
   email         String
   emailVerified Boolean
-  image         String?   @db.Text
+  image         String?  @db.Text
   createdAt     DateTime
   updatedAt     DateTime
-  sessions      Session[]
-  accounts      Account[]
 
-  File File[]
+  sessions Session[]
+  accounts Account[]
+
+  Files        File[]
+  promptUsages PromptUsage[]
+  tokens       MessageToken[]
+  subscription Subscription?
+
+  chats    Chat[]
+  messages Message[]
 
   @@unique([email])
   @@map("user")
@@ -72,6 +138,58 @@ model Verification {
   updatedAt  DateTime?
 
   @@map("verification")
+}
+
+model Subscription {
+  id     String @id @default(cuid())
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  plan      String   @default("free")
+  isActive  Boolean  @default(false)
+  startedAt DateTime
+  expiresAt DateTime
+  canceled  Boolean  @default(false)
+
+  regularLimit Int @default(100)
+  premiumLimit Int @default(10)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model PromptUsage {
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  type      PromptType
+  createdAt DateTime   @default(now())
+  expiresAt DateTime // now + 30 days
+
+  @@index([userId, createdAt])
+}
+
+enum PromptType {
+  REGULAR
+  PREMIUM
+}
+
+model MessageToken {
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  token     String   @db.Text
+  createdAt DateTime @default(now())
+  expiresAt DateTime // now + 30 days
+
+  type TokenType
+}
+
+enum TokenType {
+  PROMPT
+  COMPLETION
 }
 
 model File {

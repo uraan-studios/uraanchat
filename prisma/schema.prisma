@@ -21,14 +21,22 @@ model User {
   image         String?   @db.Text
   createdAt     DateTime
   updatedAt     DateTime
+
   sessions      Session[]
   accounts      Account[]
 
-  File File[]
+  Files          File[]
+  promptUsages  PromptUsage[]
+  tokens        MessageToken[]
+  subscription  Subscription?
+
+  chats      Chat[]
+  messages   Message[]
 
   @@unique([email])
   @@map("user")
 }
+
 
 model Session {
   id        String   @id

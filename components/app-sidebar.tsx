@@ -3,13 +3,7 @@
 import * as React from "react"
 import Link from "next/link"
 import { cn } from "@/lib/utils"
-import {
-  GitBranch,
-  Pin,
-  PinOff,
-  Trash2,
-} from "lucide-react"
-
+import { GitBranch, Trash2 } from "lucide-react"
 import { NavUser } from "@/components/nav-user"
 import {
   Sidebar,
@@ -19,82 +13,54 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-  SidebarTrigger,
 } from "@/components/ui/sidebar"
 import SidebarTopbar from "./sidebar-topbar"
 
-const data = {
-  user: {
-    name: "shadcn",
-    email: "m@example.com",
-    avatar: "/avatars/shadcn.jpg",
-  },
-  chats: [
-    {
-      id: 1,
-      title: "How to train GPT: A very long title to demonstrate truncation",
-      date: "today",
-      pinned: true,
-      branched: false,
-    },
-    {
-      id: 5,
-      title: "How to train GPT2",
-      date: "today",
-      pinned: true,
-      branched: false,
-    },
-    {
-      id: 2,
-      title: "Marketing strategy",
-      date: "today",
-      pinned: false,
-      branched: true,
-    },
-    {
-      id: 3,
-      title: "Weekly sync notes for the new quantum computing project",
-      date: "yesterday",
-      pinned: false,
-      branched: false,
-    },
-    {
-      id: 4,
-      title: "Quantum model analysis",
-      date: "3 days ago",
-      pinned: false,
-      branched: true,
-    },
-  ],
-}
+import { formatDistanceToNow, isToday, isYesterday, parseISO } from "date-fns"
+import { useRecentChats } from "@/lib/hooks/useRecentChat"
 
-function groupChatsByDate(chats: typeof data.chats) {
-  const groups: Record<string, typeof data.chats> = {}
+function groupChatsByDate(chats: Chat[]) {
+  const groups: Record<string, Chat[]> = {}
   chats.forEach((chat) => {
-    if (!groups[chat.date]) groups[chat.date] = []
-    groups[chat.date].push(chat)
+    const date = parseISO(chat.createdAt)
+    let label = "older"
+    if (isToday(date)) label = "today"
+    else if (isYesterday(date)) label = "yesterday"
+    else label = formatDistanceToNow(date, { addSuffix: true })
+
+    if (!groups[label]) groups[label] = []
+    groups[label].push(chat)
   })
   return groups
 }
 
-export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-  const chatGroups = groupChatsByDate(data.chats)
+type Chat = {
+  id: string
+  title: string
+  createdAt: string
+  branched?: boolean
+}
 
-  const renderChat = (chat: (typeof data.chats)[0], pinned?: boolean) => (
-    <div key={chat.id} className={cn("relative group")}>
+export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  const { data, isLoading } = useRecentChats()
+  const chats = data?.data ?? []
+
+  const chatGroups = groupChatsByDate(chats)
+
+  const renderChat = (chat: Chat) => (
+    <div key={chat.id} className="relative group">
       <Link
-        href="#"
+        href={`/chat/${chat.id}`}
         className="flex items-center justify-between rounded px-2 py-1.5 text-sm hover:bg-muted"
       >
         <div className="flex items-center gap-2 truncate">
           {chat.branched && (
             <GitBranch className="h-4 w-4 flex-shrink-0 text-muted-foreground" />
           )}
-          <span className="truncate">{chat.title}</span>
+          <span className="truncate">{chat.title || "New Chat"}</span>
         </div>
       </Link>
 
-      {/* Slide-in actions: hidden by default, shown on individual chat item hover */}
       <div
         className="
           absolute right-1 top-1/2 flex -translate-y-1/2 translate-x-2 opacity-0
@@ -103,17 +69,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           items-center rounded-md bg-muted
         "
       >
-        <button
-          onClick={(e) => e.preventDefault()}
-          className="p-1 hover:text-primary"
-          title={chat.pinned ? "Unpin chat" : "Pin chat"}
-        >
-          {chat.pinned ? (
-            <PinOff className="h-4 w-4" />
-          ) : (
-            <Pin className="h-4 w-4" />
-          )}
-        </button>
         <button
           onClick={(e) => e.preventDefault()}
           className="p-1 hover:text-destructive"
@@ -130,56 +85,44 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       <SidebarHeader className="mb-2">
         <SidebarMenu>
           <SidebarMenuItem>
-            
             <SidebarTopbar />
-
             <h2 className="text-lg font-semibold leading-tight text-sidebar-primary text-center">
               Uraan Chat
             </h2>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
+
       <SidebarContent>
-
-          <SidebarMenuButton
-            asChild
-            className="items-center font-semibold bg-primary text-primary-foreground hover:bg-accent hover:text-accent-foreground"
+        <SidebarMenuButton
+          asChild
+          className="items-center font-semibold bg-primary text-primary-foreground hover:bg-accent hover:text-accent-foreground"
+        >
+          <Link
+            href="/"
+            aria-label="Start a new chat"
+            className="flex w-full items-center justify-center rounded py-2 text-center"
           >
-            <Link
-              href="/"
-              aria-label="Start a new chat"
-              className="flex w-full items-center justify-center rounded py-2 text-center"
-            >
-              New Chat
-            </Link>
-          </SidebarMenuButton>
+            New Chat
+          </Link>
+        </SidebarMenuButton>
 
-        {/* Pinned Chats */}
-        {data.chats.some((chat) => chat.pinned) && (
-          <div className="px-3 pt-4 space-y-2">
-            <p className="mb-1 text-xs text-muted-foreground">Pinned</p>
-            {data.chats
-              .filter((chat) => chat.pinned)
-              .map((chat) => renderChat(chat, true))}
-          </div>
+        {isLoading ? (
+          <div className="px-3 pt-4 text-sm text-muted-foreground">Loading...</div>
+        ) : (
+          Object.entries(chatGroups).map(([label, chats]) => (
+            <div key={label} className="px-3 pt-4">
+              <p className="mb-1 text-xs capitalize text-muted-foreground">
+                {label}
+              </p>
+              {chats.map(renderChat)}
+            </div>
+          ))
         )}
-
-        {/* Grouped Chats */}
-        {Object.entries(chatGroups).map(([label, chats]) => (
-          <div key={label} className="px-3 pt-4">
-            <p className="mb-1 text-xs capitalize text-muted-foreground">
-              {label}
-            </p>
-            {chats
-              .filter((chat) => !chat.pinned)
-              .map((chat) => renderChat(chat))}
-          </div>
-        ))}
       </SidebarContent>
 
-
       <SidebarFooter>
-        <NavUser user={data.user} />
+        <NavUser />
       </SidebarFooter>
     </Sidebar>
   )
