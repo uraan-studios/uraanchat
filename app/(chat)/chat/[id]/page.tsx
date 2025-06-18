@@ -9,6 +9,7 @@ import { Attachment, ChatInput } from "@/components/chat/chat-input";
 import { ConversationView } from "@/components/chat/conversation-view";
 import { useDynamicChat } from "@/lib/hooks/useDynamicChat";
 import { useChatStore } from "@/lib/stores/chat-store";
+import { ModelSelector } from "@/components/chat/model-selector";
 
 
 const ChatPage = () => {
@@ -191,18 +192,9 @@ const ChatPage = () => {
         >
           New Chat
         </button>
-        <select
-          value={model}
-          onChange={(e) => updateModel(e.target.value)}
-          className="p-2 border rounded"
-        >
-          {MODELS.map((m) => (
-            <option key={m.id} value={m.id}>
-              {m.name}
-            </option>
-          ))}
-        </select>
+        <ModelSelector value={model} onChange={updateModel} />
       </div>
+
 
       <ConversationView
         messages={messages}

@@ -3,7 +3,7 @@ import { SYSTEM_MESSAGE } from "@/constants/system";
 import { auth } from "@/lib/auth";
 import db from "@/lib/db";
 import { createOpenRouter } from "@openrouter/ai-sdk-provider";
-import { streamText, CoreMessage } from "ai";
+import { streamText, CoreMessage, generateText } from "ai";
 import { Settings } from "lucide-react";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -52,6 +52,22 @@ export async function POST(req: NextRequest) {
           title: "", // Optional: You can set a preview of the first user message
           rootMessage: "", // Optional: Set later if needed
         },
+      });
+
+      //  MAKE A BACKGROUND JOB TO UPDATE THE TITLE
+
+      const titleModel = openrouter.chat('google/gemini-2.5-flash', {
+        user: userId,
+      });
+      const {text} = await generateText({
+        model: titleModel,
+        messages,
+        system: "Youll generate a title for this chat based on the user's message. Return only the title, no quotes or extra text.\n\nUser message",
+      }) 
+
+      await db.chat.update({
+        where: { id },
+        data: { title: text },
       });
     }
 

@@ -6,6 +6,7 @@ import { ConversationView } from '@/components/chat/conversation-view';
 import { ChatInput, Attachment } from '@/components/chat/chat-input';
 import { MODELS } from '@/lib/models';
 import { useDynamicChat } from '@/lib/hooks/useDynamicChat';
+import { ModelSelector } from '@/components/chat/model-selector';
 
 export default function ChatPage() {
   const bottomRef = useRef<HTMLDivElement | null>(null);
@@ -75,23 +76,8 @@ export default function ChatPage() {
   return (
     <div className="h-[98dvh] flex flex-col overflow-hidden items-center">
       <div className="w-full max-w-3xl p-2 flex justify-between items-center">
-        <button
-          onClick={createNewChat}
-          className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
-        >
-          New Chat
-        </button>
-        <select
-          value={model}
-          onChange={(e) => updateModel(e.target.value)}
-          className="p-2 border rounded"
-        >
-          {MODELS.map((m) => (
-            <option key={m.id} value={m.id}>
-              {m.name}
-            </option>
-          ))}
-        </select>
+        <ModelSelector value={model} onChange={updateModel} />
+        
       </div>
 
       <ConversationView

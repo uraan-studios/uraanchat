@@ -1,20 +1,34 @@
-// components/sidebar/chat-sidebar.tsx
-'use client';
+"use client"
 
-import React, { useRef } from 'react';
-import { useRecentChats } from '@/lib/hooks/useRecentChat';
-import { useIntersectionObserver } from '@/lib/hooks/useIntersectionObserver';
-import { Plus, MessageSquare, Trash2 } from 'lucide-react';
+import * as React from "react"
+import Link from "next/link"
+import { cn } from "@/lib/utils"
+import { GitBranch, MessageSquare, Trash2 } from "lucide-react"
+import { NavUser } from "@/components/nav-user"
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarFooter,
+  SidebarHeader,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+} from "@/components/ui/sidebar"
+import SidebarTopbar from "./sidebar-topbar"
 import { useMutation } from '@tanstack/react-query';
-import { toast } from 'sonner';
-import Link from 'next/link';
+import { formatDistanceToNow, isToday, isYesterday, parseISO } from "date-fns"
+import { useRecentChats } from "@/lib/hooks/useRecentChat"
+import { toast } from "sonner"
+import { useIntersectionObserver } from "@/lib/hooks/useIntersectionObserver"
+import { ScrollArea, ScrollBar } from "./ui/scroll-area"
 
-interface ChatSidebarProps {
+
+interface ChatSidebarProps extends React.ComponentProps<typeof Sidebar> {
   onNewChat: () => void;
 }
 
-export function ChatSidebar({ onNewChat }: ChatSidebarProps) {
-  const loadMoreRef = useRef<HTMLDivElement>(null);
+export function AppSidebar({ onNewChat, ...props }: ChatSidebarProps) {
+  const loadMoreRef = React.useRef<HTMLDivElement>(null);
   
   const {
     chats,
@@ -62,29 +76,35 @@ export function ChatSidebar({ onNewChat }: ChatSidebarProps) {
     }
   };
 
-  if (error) {
-    return (
-      <div className="w-64 border-r bg-gray-50 p-4">
-        <p className="text-red-500">Failed to load chats</p>
-      </div>
-    );
-  }
 
   return (
-    <div className="w-64 border-r bg-gray-50 flex flex-col h-full">
-      {/* Header */}
-      <div className="p-4 border-b">
-        <button
-          onClick={onNewChat}
-          className="w-full flex items-center gap-2 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
+    <Sidebar variant="inset" {...props}>
+      <SidebarHeader className="mb-2">
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarTopbar />
+            <h2 className="text-lg font-semibold leading-tight text-sidebar-primary text-center">
+              Uraan Chat
+            </h2>
+          </SidebarMenuItem>
+
+          <SidebarMenuButton
+          asChild
+          className="mt-4 items-center font-semibold bg-primary text-primary-foreground hover:bg-accent hover:text-accent-foreground"
         >
-          <Plus className="w-4 h-4" />
-          New Chat
-        </button>
-      </div>
+            <div className=" ">
+
+              New Chat
+            </div>
+        </SidebarMenuButton>
+        </SidebarMenu>
+      </SidebarHeader>
+
+      <SidebarContent className="flex flex-col gap-2 ">
+
 
       {/* Chat List - Scrollable Area */}
-      <div className="flex-1 overflow-y-auto">
+      <div >
         <div className="p-2">
           {isLoading && chats.length === 0 ? (
             <div className="space-y-2">
@@ -96,18 +116,19 @@ export function ChatSidebar({ onNewChat }: ChatSidebarProps) {
               ))}
             </div>
           ) : (
-            <div className="space-y-1">
+            <ScrollArea >
+              <div className="space-y-1">
               {chats.map((chat) => (
                 <Link
                   key={chat.id}
                   href={`/chat/${chat.id}`}
-                  className="block p-3 rounded-lg hover:bg-gray-200 transition-colors group"
+                  className="block p-3  rounded-lg hover:bg-accent transition-colors group"
                 >
                   <div className="flex items-start justify-between">
                     <div className="flex items-start gap-2 flex-1 min-w-0">
                       <MessageSquare className="w-4 h-4 mt-0.5 text-gray-500 flex-shrink-0" />
                       <div className="min-w-0 flex-1">
-                        <p className="text-sm font-medium text-gray-900 truncate">
+                        <p className="text-sm font-medium text-muted-foreground truncate">
                           {chat.title || 'Untitled Chat'}
                         </p>
                         <p className="text-xs text-gray-500">
@@ -150,12 +171,16 @@ export function ChatSidebar({ onNewChat }: ChatSidebarProps) {
                   <p className="text-sm">No chats yet</p>
                 </div>
               )}
-            </div>
+              </div>
+            </ScrollArea>
           )}
         </div>
       </div>
-    </div>
-  );
-}
+      </SidebarContent>
 
-export default ChatSidebar;
+      <SidebarFooter>
+        <NavUser />
+      </SidebarFooter>
+    </Sidebar>
+  )
+}

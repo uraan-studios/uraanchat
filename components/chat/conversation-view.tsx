@@ -11,61 +11,130 @@ import Image from 'next/image';
 
 const TOP_SPACER_HEIGHT = 32; // px
 
+// Extend the Message type to include experimental_attachments
+interface ExtendedMessage extends Message {
+  experimental_attachments?: Array<{
+    name: string;
+    contentType: string;
+    url: string;
+  }>;
+}
+
 // Helper component to render the user's potentially complex message
-const UserMessageContent = ({ message }: { message: Message }) => {
+const UserMessageContent = ({ message }: { message: ExtendedMessage }) => {
   const userBubble =
     'bg-card rounded-xl px-4 py-2 inline-block max-w-[80%] min-w-[140px]';
+
+  // Debug log to see what's in the message
+  console.log('UserMessageContent - message:', message);
 
   // Handle the new format where `content` is an array of parts
   if (Array.isArray(message.content)) {
     return (
-      <div className={`${userBubble} flex flex-col gap-2`}>
-        {message.content.map((part, index) => {
-          if (part.type === 'text') {
-            return <p key={index}>{part.text}</p>;
-          }
-          if (part.type === 'image' && 'url' in part) {
-            return (
-              <div key={index} className="relative w-48 h-48">
-                <Image
-                  src={part.url as string}
-                  alt="User attachment"
-                  layout="fill"
-                  objectFit="cover"
-                  className="rounded-md"
-                />
-              </div>
-            );
-          }
-          if (part.type === 'document' && 'url' in part) {
-            return (
-              <a
-                key={index}
-                href={part.url as string}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-2 p-2 bg-gray-200 dark:bg-gray-700 rounded-md hover:bg-gray-300 dark:hover:bg-gray-600"
-              >
-                <FileText className="w-5 h-5" />
-                <span className="truncate">
-                  {/* Extract filename from URL */}
-                  {(part.url as string).split('/').pop()}
-                </span>
-              </a>
-            );
-          }
-          return null;
-        })}
+      <div className="flex flex-col gap-2 items-end">
+        <div className={`${userBubble} flex flex-col gap-2`}>
+          {message.content.map((part, index) => {
+            if (part.type === 'text') {
+              return <p key={index}>{part.text}</p>;
+            }
+            if (part.type === 'image' && 'url' in part) {
+              return (
+                <div key={index} className="relative w-48 h-48">
+                  <Image
+                    src={part.url as string}
+                    alt="User attachment"
+                    fill
+                    style={{ objectFit: 'cover' }}
+                    className="rounded-md"
+                  />
+                </div>
+              );
+            }
+            if (part.type === 'document' && 'url' in part) {
+              return (
+                <a
+                  key={index}
+                  href={part.url as string}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 p-2 bg-gray-200 dark:bg-gray-700 rounded-md hover:bg-gray-300 dark:hover:bg-gray-600"
+                >
+                  <FileText className="w-5 h-5" />
+                  <span className="truncate">
+                    {(part.url as string).split('/').pop()}
+                  </span>
+                </a>
+              );
+            }
+            return null;
+          })}
+        </div>
+        
+        {/* Render experimental_attachments */}
+        {message.experimental_attachments && message.experimental_attachments.length > 0 && (
+          <div className="flex flex-col gap-1 max-w-[80%]">
+            {message.experimental_attachments.map((attachment, index) => {
+              const isImage = attachment.contentType?.startsWith('image/');
+              const IconComponent = isImage ? ImageIcon : FileText;
+              
+              return (
+                <a
+                  key={index}
+                  href={attachment.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 p-2 bg-gray-100 dark:bg-gray-800 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors text-sm"
+                  title={`Open ${attachment.name}`}
+                >
+                  <IconComponent className="w-4 h-4 text-gray-600 dark:text-gray-400" />
+                  <span className="truncate text-gray-700 dark:text-gray-300">
+                    {attachment.name}
+                  </span>
+                </a>
+              );
+            })}
+          </div>
+        )}
       </div>
     );
   }
 
-  // Fallback for simple string content
-  return <div className={userBubble}>{message.content}</div>;
+  // Fallback for simple string content - also check for experimental_attachments
+  return (
+    <div className="flex flex-col gap-2 items-end">
+      <div className={userBubble}>{message.content}</div>
+      
+      {/* Render experimental_attachments for simple content too */}
+      {message.experimental_attachments && message.experimental_attachments.length > 0 && (
+        <div className="flex flex-col gap-1 max-w-[80%]">
+          {message.experimental_attachments.map((attachment, index) => {
+            const isImage = attachment.contentType?.startsWith('image/');
+            const IconComponent = isImage ? ImageIcon : FileText;
+            
+            return (
+              <a
+                key={index}
+                href={attachment.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 p-2 bg-gray-100 dark:bg-gray-800 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors text-sm"
+                title={`Open ${attachment.name}`}
+              >
+                <IconComponent className="w-4 h-4 text-gray-600 dark:text-gray-400" />
+                <span className="truncate text-gray-700 dark:text-gray-300">
+                  {attachment.name}
+                </span>
+              </a>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
 };
 
 interface ConversationViewProps {
-  messages: Message[];
+  messages: ExtendedMessage[];
   isLoading: boolean;
   retry: () => void;
   clickPrompt: (prompt: string) => void;
@@ -79,8 +148,11 @@ export function ConversationView({
   clickPrompt,
   bottomRef,
 }: ConversationViewProps) {
+  // Debug log to see all messages
+  console.log('ConversationView - messages:', messages);
+
   // Robustly get text content for the copy button
-  const getMessageText = (message: Message) => {
+  const getMessageText = (message: ExtendedMessage) => {
     if (typeof message.content === 'string') {
       return message.content;
     }

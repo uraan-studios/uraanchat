@@ -4,7 +4,8 @@
 import React from 'react';
 
 import { useRouter } from 'next/navigation';
-import ChatSidebar from '@/components/app-sidebar';
+import { AppSidebar } from '@/components/app-sidebar';
+import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
 
 interface ChatLayoutProps {
   children: React.ReactNode;
@@ -18,12 +19,15 @@ export function ChatLayout({ children }: ChatLayoutProps) {
   };
 
   return (
-    <div className="flex h-screen">
-      <ChatSidebar onNewChat={handleNewChat} />
-      <main className="flex-1 overflow-hidden">
+    
+    <body className="flex h-screen">
+      <SidebarProvider>
+      <AppSidebar onNewChat={handleNewChat} />
+      <SidebarInset className="flex-1 overflow-hidden">
         {children}
-      </main>
-    </div>
+      </SidebarInset>
+    </SidebarProvider>
+    </body>
   );
 }
 
