@@ -69,7 +69,7 @@ export function NavUser() {
 
               <DropdownMenuItem
                 onClick={()=> {
-                  router.push("/dashboard/settings")
+                  router.push("/settings")
                 }}
               >
                 <Settings />
