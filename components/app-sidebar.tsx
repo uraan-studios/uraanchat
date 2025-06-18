@@ -1,129 +1,161 @@
-"use client"
+// components/sidebar/chat-sidebar.tsx
+'use client';
 
-import * as React from "react"
-import Link from "next/link"
-import { cn } from "@/lib/utils"
-import { GitBranch, Trash2 } from "lucide-react"
-import { NavUser } from "@/components/nav-user"
-import {
-  Sidebar,
-  SidebarContent,
-  SidebarFooter,
-  SidebarHeader,
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
-} from "@/components/ui/sidebar"
-import SidebarTopbar from "./sidebar-topbar"
+import React, { useRef } from 'react';
+import { useRecentChats } from '@/lib/hooks/useRecentChat';
+import { useIntersectionObserver } from '@/lib/hooks/useIntersectionObserver';
+import { Plus, MessageSquare, Trash2 } from 'lucide-react';
+import { useMutation } from '@tanstack/react-query';
+import { toast } from 'sonner';
+import Link from 'next/link';
 
-import { formatDistanceToNow, isToday, isYesterday, parseISO } from "date-fns"
-import { useRecentChats } from "@/lib/hooks/useRecentChat"
-
-function groupChatsByDate(chats: Chat[]) {
-  const groups: Record<string, Chat[]> = {}
-  chats.forEach((chat) => {
-    const date = parseISO(chat.createdAt)
-    let label = "older"
-    if (isToday(date)) label = "today"
-    else if (isYesterday(date)) label = "yesterday"
-    else label = formatDistanceToNow(date, { addSuffix: true })
-
-    if (!groups[label]) groups[label] = []
-    groups[label].push(chat)
-  })
-  return groups
+interface ChatSidebarProps {
+  onNewChat: () => void;
 }
 
-type Chat = {
-  id: string
-  title: string
-  createdAt: string
-  branched?: boolean
-}
+export function ChatSidebar({ onNewChat }: ChatSidebarProps) {
+  const loadMoreRef = useRef<HTMLDivElement>(null);
+  
+  const {
+    chats,
+    isLoading,
+    error,
+    hasNextPage,
+    fetchNextPage,
+    isFetchingNextPage,
+    removeChat,
+  } = useRecentChats(20);
 
-export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-  const { data, isLoading } = useRecentChats()
-  const chats = data?.data ?? []
+  // Load more chats when scrolling to bottom
+  useIntersectionObserver(loadMoreRef, {
+    onIntersect: () => {
+      if (hasNextPage && !isFetchingNextPage) {
+        fetchNextPage();
+      }
+    },
+    enabled: hasNextPage && !isFetchingNextPage,
+  });
 
-  const chatGroups = groupChatsByDate(chats)
+  // Delete chat mutation
+  const deleteChatMutation = useMutation({
+    mutationFn: async (chatId: string) => {
+      const response = await fetch(`/api/chat/${chatId}`, {
+        method: 'DELETE',
+      });
+      if (!response.ok) throw new Error('Failed to delete chat');
+      return response.json();
+    },
+    onSuccess: (_, chatId) => {
+      removeChat(chatId);
+      toast.success('Chat deleted successfully');
+    },
+    onError: (error) => {
+      toast.error(error.message || 'Failed to delete chat');
+    },
+  });
 
-  const renderChat = (chat: Chat) => (
-    <div key={chat.id} className="relative group">
-      <Link
-        href={`/chat/${chat.id}`}
-        className="flex items-center justify-between rounded px-2 py-1.5 text-sm hover:bg-muted"
-      >
-        <div className="flex items-center gap-2 truncate">
-          {chat.branched && (
-            <GitBranch className="h-4 w-4 flex-shrink-0 text-muted-foreground" />
-          )}
-          <span className="truncate">{chat.title || "New Chat"}</span>
-        </div>
-      </Link>
+  const handleDeleteChat = (chatId: string, e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (confirm('Are you sure you want to delete this chat?')) {
+      deleteChatMutation.mutate(chatId);
+    }
+  };
 
-      <div
-        className="
-          absolute right-1 top-1/2 flex -translate-y-1/2 translate-x-2 opacity-0
-          group-hover:translate-x-0 group-hover:opacity-100
-          transition-all duration-200
-          items-center rounded-md bg-muted
-        "
-      >
-        <button
-          onClick={(e) => e.preventDefault()}
-          className="p-1 hover:text-destructive"
-          title="Delete chat"
-        >
-          <Trash2 className="h-4 w-4" />
-        </button>
+  if (error) {
+    return (
+      <div className="w-64 border-r bg-gray-50 p-4">
+        <p className="text-red-500">Failed to load chats</p>
       </div>
-    </div>
-  )
+    );
+  }
 
   return (
-    <Sidebar variant="inset" {...props}>
-      <SidebarHeader className="mb-2">
-        <SidebarMenu>
-          <SidebarMenuItem>
-            <SidebarTopbar />
-            <h2 className="text-lg font-semibold leading-tight text-sidebar-primary text-center">
-              Uraan Chat
-            </h2>
-          </SidebarMenuItem>
-        </SidebarMenu>
-      </SidebarHeader>
-
-      <SidebarContent>
-        <SidebarMenuButton
-          asChild
-          className="items-center font-semibold bg-primary text-primary-foreground hover:bg-accent hover:text-accent-foreground"
+    <div className="w-64 border-r bg-gray-50 flex flex-col h-full">
+      {/* Header */}
+      <div className="p-4 border-b">
+        <button
+          onClick={onNewChat}
+          className="w-full flex items-center gap-2 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
         >
-          <Link
-            href="/"
-            aria-label="Start a new chat"
-            className="flex w-full items-center justify-center rounded py-2 text-center"
-          >
-            New Chat
-          </Link>
-        </SidebarMenuButton>
+          <Plus className="w-4 h-4" />
+          New Chat
+        </button>
+      </div>
 
-        {isLoading ? (
-          <div className="px-3 pt-4 text-sm text-muted-foreground">Loading...</div>
-        ) : (
-          Object.entries(chatGroups).map(([label, chats]) => (
-            <div key={label} className="px-3 pt-4">
-              <p className="mb-1 text-xs capitalize text-muted-foreground">
-                {label}
-              </p>
-              {chats.map(renderChat)}
+      {/* Chat List - Scrollable Area */}
+      <div className="flex-1 overflow-y-auto">
+        <div className="p-2">
+          {isLoading && chats.length === 0 ? (
+            <div className="space-y-2">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <div
+                  key={i}
+                  className="h-12 bg-gray-200 rounded animate-pulse"
+                />
+              ))}
             </div>
-          ))
-        )}
-      </SidebarContent>
+          ) : (
+            <div className="space-y-1">
+              {chats.map((chat) => (
+                <Link
+                  key={chat.id}
+                  href={`/chat/${chat.id}`}
+                  className="block p-3 rounded-lg hover:bg-gray-200 transition-colors group"
+                >
+                  <div className="flex items-start justify-between">
+                    <div className="flex items-start gap-2 flex-1 min-w-0">
+                      <MessageSquare className="w-4 h-4 mt-0.5 text-gray-500 flex-shrink-0" />
+                      <div className="min-w-0 flex-1">
+                        <p className="text-sm font-medium text-gray-900 truncate">
+                          {chat.title || 'Untitled Chat'}
+                        </p>
+                        <p className="text-xs text-gray-500">
+                          {new Date(chat.createdAt).toLocaleDateString()}
+                        </p>
+                      </div>
+                    </div>
+                    <button
+                      className="opacity-0 group-hover:opacity-100 transition-opacity w-6 h-6 p-0 hover:bg-red-100 rounded"
+                      onClick={(e) => handleDeleteChat(chat.id, e)}
+                      disabled={deleteChatMutation.isPending}
+                    >
+                      <Trash2 className="w-3 h-3 text-red-600" />
+                    </button>
+                  </div>
+                </Link>
+              ))}
 
-      <SidebarFooter>
-        <NavUser />
-      </SidebarFooter>
-    </Sidebar>
-  )
+              {/* Load more trigger */}
+              {hasNextPage && (
+                <div ref={loadMoreRef} className="py-4">
+                  {isFetchingNextPage ? (
+                    <div className="flex justify-center">
+                      <div className="w-6 h-6 border-2 border-gray-300 border-t-blue-500 rounded-full animate-spin" />
+                    </div>
+                  ) : (
+                    <button
+                      onClick={() => fetchNextPage()}
+                      className="w-full py-2 text-sm text-gray-600 hover:text-gray-800 transition-colors"
+                    >
+                      Load more chats
+                    </button>
+                  )}
+                </div>
+              )}
+
+              {chats.length === 0 && !isLoading && (
+                <div className="text-center py-8 text-gray-500">
+                  <MessageSquare className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                  <p className="text-sm">No chats yet</p>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
 }
+
+export default ChatSidebar;

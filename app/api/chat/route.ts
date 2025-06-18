@@ -86,7 +86,7 @@ export async function POST(req: NextRequest) {
       model: chatModel,
       messages,
       system: SYSTEM_MESSAGE,
-
+      
       async onFinish(result) {
         try {
           const assistantMessage = result.response.messages[0];

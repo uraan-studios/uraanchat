@@ -1,24 +1,30 @@
-import { AppSidebar } from '@/components/app-sidebar'
-import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar'
-import React from 'react'
+// components/layout/chat-layout.tsx
+'use client';
 
-const ChatLayout = ({
-  children,
-}: Readonly<{
+import React from 'react';
+
+import { useRouter } from 'next/navigation';
+import ChatSidebar from '@/components/app-sidebar';
+
+interface ChatLayoutProps {
   children: React.ReactNode;
-}>) => {
-
-  return (
-    <body className='overflow-y-clip'>
-        <SidebarProvider>
-            <AppSidebar />
-            <SidebarInset className='overflow-y-clip'>
-              {children}
-            </SidebarInset>
-        </SidebarProvider>
-      
-    </body>
-  )
 }
 
-export default ChatLayout
+export function ChatLayout({ children }: ChatLayoutProps) {
+  const router = useRouter();
+
+  const handleNewChat = () => {
+    router.push('/chat');
+  };
+
+  return (
+    <div className="flex h-screen">
+      <ChatSidebar onNewChat={handleNewChat} />
+      <main className="flex-1 overflow-hidden">
+        {children}
+      </main>
+    </div>
+  );
+}
+
+export default ChatLayout;

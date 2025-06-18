@@ -1,25 +1,16 @@
 'use client';
 
 import React, { useRef, useEffect, useCallback, useState } from 'react';
-import { useChat } from '@ai-sdk/react';
 import { ConversationView } from '@/components/chat/conversation-view';
 import { ChatInput, Attachment } from '@/components/chat/chat-input';
 import { MODELS } from '@/lib/models';
-import { toast } from 'sonner';
+import { useDynamicChat } from '@/lib/hooks/useDynamicChat';
 
 export default function ChatPage() {
   const bottomRef = useRef<HTMLDivElement | null>(null);
-
   const [model, setModel] = useState(MODELS[0].id);
-//   const [attachments, setAttachments] = useState<Attachment[]>([{
-//     "id": "1749971673745",
-//     "key": "f/ac581160-3276-4ae7-95b0-6231c59b3fe4",
-//     "name": "Yasin Shah Resume v2f.pdf",
-//     "size": 478195,
-//     "type": "application/pdf",
-//     "isUploading": false
-// }]);
   const [attachments, setAttachments] = useState<Attachment[]>([]);
+
   const selectedModel = MODELS.find((m) => m.id === model);
   const supports = selectedModel?.supports ?? [];
 
@@ -37,20 +28,15 @@ export default function ChatPage() {
     messages,
     input,
     handleInputChange,
-    handleSubmit: originalHandleSubmit,
+    handleSubmit,
     isLoading,
     setMessages,
     reload,
-    error,
-    stop
-  } = useChat({
-    api: '/api/chat',
-    body: { model,  },
-    onFinish() {
+    currentChatId,
+  } = useDynamicChat({
+    model,
+    onFinish: () => {
       setTimeout(() => bottomRef.current?.scrollIntoView(), 50);
-    },
-    onError(error) {
-      toast.error(error.message);
     },
   });
 
@@ -58,25 +44,23 @@ export default function ChatPage() {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-const handleSubmitWithAttachments = (e: React.FormEvent<HTMLFormElement>) => {
-  e.preventDefault();
-  if (isLoading || input.trim().length === 0) return;
+  const handleSubmitWithAttachments = (e: React.FormEvent<HTMLFormElement>) => {
+    if (isLoading || input.trim().length === 0) return;
 
-  const validAttachments = attachments
-    .filter((att) => !att.isUploading && att.key)
-    .map((att) => ({
-      name: att.name,
-      contentType: att.type,
-      url: `https://chat.localhook.online/${att.key}`,
-    }));
+    const validAttachments = attachments
+      .filter((att) => !att.isUploading && att.key)
+      .map((att) => ({
+        name: att.name,
+        contentType: att.type,
+        url: `https://chat.localhook.online/${att.key}`,
+      }));
 
-  originalHandleSubmit(e, {
-    experimental_attachments: validAttachments,
-  });
+    handleSubmit(e, {
+      experimental_attachments: validAttachments,
+    });
 
-  setAttachments([]);
-};
-
+    setAttachments([]);
+  };
 
   const retry = useCallback(() => {
     const lastAssistantIdx = [...messages].reverse().findIndex((m) => m.role === 'assistant');
@@ -120,8 +104,7 @@ const handleSubmitWithAttachments = (e: React.FormEvent<HTMLFormElement>) => {
         randomPrompt={() =>
           handleInputChange({
             target: {
-              value:
-                'Explain quantum computing in simple terms',
+              value: 'Explain quantum computing in simple terms',
             },
           } as any)
         }
