@@ -26,19 +26,18 @@ interface ChatSidebarProps extends React.ComponentProps<typeof Sidebar> {
 }
 
 export function AppSidebar({ onNewChat, ...props }: ChatSidebarProps) {
-  const loadMoreRef = React.useRef<HTMLDivElement>(null)
+  const loadMoreRef = React.useRef<HTMLDivElement | null>(null)
 
   const {
     chats,
     isLoading,
-    error,
     hasNextPage,
     fetchNextPage,
     isFetchingNextPage,
     removeChat,
   } = useRecentChats(20)
 
-  useIntersectionObserver(loadMoreRef, {
+  useIntersectionObserver(loadMoreRef  as React.RefObject<Element>, {
     onIntersect: () => {
       if (hasNextPage && !isFetchingNextPage) {
         fetchNextPage()

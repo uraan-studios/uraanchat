@@ -11,12 +11,9 @@ import { Toaster } from '@/components/ui/sonner';
 
 const outfit = Outfit({
   variable: '--font-sans', // generic “sans” variable
+  subsets: ['latin'],
 });
 
-const geistMono = Geist_Mono({
-  subsets: ['latin'],
-  variable: '--font-mono',
-});
 
 /* ────────────────────  METADATA  ──────────────────── */
 

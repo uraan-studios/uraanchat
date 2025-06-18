@@ -8,7 +8,12 @@ import { ScrollArea, ScrollBar } from '../ui/scroll-area';
 function getTextContent(node: React.ReactNode): string {
   if (typeof node === 'string') return node;
   if (Array.isArray(node)) return node.map(getTextContent).join('');
-  if (React.isValidElement(node)) return getTextContent(node.props.children);
+  if (React.isValidElement(node) && typeof node === 'object' && node !== null && 'props' in node) {
+    const props = (node as { props?: unknown }).props;
+    if (props && typeof props === 'object' && 'children' in props) {
+      return getTextContent((props as { children?: React.ReactNode }).children);
+    }
+  }
   return '';
 }
 

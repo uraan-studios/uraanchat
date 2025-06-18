@@ -35,7 +35,7 @@ export function MessageContent({ message }: { message: Message }) {
             if (typeof part.reasoning === 'string') {
               details = [{ type: 'text', text: part.reasoning }];
             } else if (Array.isArray(part.reasoning)) {
-              details = part.reasoning.map((detail) => ({
+              details = (part.reasoning as any[]).map((detail: any) => ({
                 type: detail.type,
                 text: detail.text,
               }));
