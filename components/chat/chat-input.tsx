@@ -39,6 +39,8 @@ interface ChatInputProps {
   // New props for managing attachments from the parent
   attachments: Attachment[];
   setAttachments: React.Dispatch<React.SetStateAction<Attachment[]>>;
+  allowImage?: boolean;
+  allowDocument?: boolean;
 }
 
 export function ChatInput({
@@ -51,6 +53,8 @@ export function ChatInput({
   idea,
   attachments,
   setAttachments, // Receive state and setter from parent
+  allowImage,
+  allowDocument,
 }: ChatInputProps) {
   const textRef = useRef<HTMLTextAreaElement | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
@@ -59,7 +63,14 @@ export function ChatInput({
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       // Allow submission if there's text OR attachments
-      if (input.trim() || attachments.length > 0) handleSubmit(e as any);
+      if (input.trim() || attachments.length > 0) {
+        // Only call handleSubmit if e.target is a form element
+        const form = e.currentTarget.form;
+        if (form) {
+          const event = new Event('submit', { bubbles: true, cancelable: true });
+          form.dispatchEvent(event);
+        }
+      }
     }
   };
 

@@ -91,7 +91,7 @@ export async function POST(req: NextRequest) {
             // ===== THIS IS THE FIX =====
             // If the part type is unknown, throw an error.
             // This will be caught by the main catch block, ensuring a response.
-            throw new Error(`Unsupported content part type: '${(part as any).type}'`);
+            throw new Error(`Unsupported content part type: '${(part as { type?: string }).type}'`);
             // ==========================
           }),
         );

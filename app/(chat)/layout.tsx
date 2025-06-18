@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation';
 import { AppSidebar } from '@/components/app-sidebar';
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
 import { ApiKeyProvider } from '@/components/apikeyprovider';
+import { RedirectToSignIn, SignedIn } from '@daveyplate/better-auth-ui';
 
 interface ChatLayoutProps {
   children: React.ReactNode;
@@ -20,7 +21,10 @@ export function ChatLayout({ children }: ChatLayoutProps) {
   };
 
   return (
-    
+    <>
+    <RedirectToSignIn />
+    <SignedIn>
+
     <body className="flex h-screen">
         <ApiKeyProvider>
       <SidebarProvider>
@@ -32,6 +36,8 @@ export function ChatLayout({ children }: ChatLayoutProps) {
       </SidebarProvider>
         </ApiKeyProvider>
     </body>
+    </SignedIn>
+    </>
   );
 }
 

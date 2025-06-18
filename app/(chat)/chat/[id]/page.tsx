@@ -124,7 +124,7 @@ const ChatPage = () => {
     e.preventDefault();
     if (isLoading || input.trim().length === 0) return;
 
-    const validAttachments = attachments
+    const validAttachments: Array<{ name: string; contentType: string; url: string }> = attachments
       .filter((att) => !att.isUploading && att.key)
       .map((att) => ({
         name: att.name,
@@ -191,13 +191,25 @@ const ChatPage = () => {
 
 
       <ConversationView
-        messages={messages}
+        messages={messages.map(m => ({
+          ...m,
+          experimental_attachments: m.experimental_attachments
+            ? m.experimental_attachments.map(att => ({
+                name: att.name ?? '',
+                contentType: String('type' in att ? att.type ?? '' : att.contentType ?? ''),
+                url: 'key' in att ? (att.key ? `https://chat.localhook.online/${att.key}` : '') : att.url ?? ''
+              }))
+            : undefined
+        }))}
         isLoading={isLoading}
         retry={retry}
-        clickPrompt={(prompt: string) =>
-          handleInputChange({ target: { value: prompt } } as any)
-        }
-        bottomRef={bottomRef}
+        clickPrompt={(prompt: string) => {
+          const syntheticEvent = {
+            target: { value: prompt }
+          } as React.ChangeEvent<HTMLInputElement>;
+          handleInputChange(syntheticEvent);
+        }}
+        bottomRef={bottomRef as React.RefObject<HTMLDivElement>}
       />
 
       <ChatInput
@@ -205,23 +217,26 @@ const ChatPage = () => {
         handleInputChange={handleInputChange}
         handleSubmit={handleSubmitWithAttachments}
         isLoading={isLoading}
-        randomPrompt={() =>
-          handleInputChange({
+        randomPrompt={() => {
+          const syntheticEvent = {
             target: {
               value: "Explain quantum computing in simple terms",
             },
-          } as any)
-        }
-        lorem={() =>
-          handleInputChange({
-            target: { value: "Generate a random piece of lorem ipsum." },
-          } as any)
-        }
-        idea={() =>
-          handleInputChange({
-            target: { value: "Give me a creative project idea." },
-          } as any)
-        }
+          } as React.ChangeEvent<HTMLInputElement>;
+          handleInputChange(syntheticEvent);
+        }}
+        lorem={() => {
+          const syntheticEvent = {
+            target: { value: "Generate a random piece of lorem ipsum." }
+          } as React.ChangeEvent<HTMLInputElement>;
+          handleInputChange(syntheticEvent);
+        }}
+        idea={() => {
+          const syntheticEvent = {
+            target: { value: "Give me a creative project idea." }
+          } as React.ChangeEvent<HTMLInputElement>;
+          handleInputChange(syntheticEvent);
+        }}
         attachments={attachments}
         setAttachments={setAttachments}
         allowImage={supports.includes("image")}

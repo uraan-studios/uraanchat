@@ -14,10 +14,12 @@ async function generateAndSetChatTitle({
   id,
   messages,
   userId,
+  openrouter
 }: {
   id: string;
   messages: CoreMessage[];
   userId: string;
+  openrouter: ReturnType<typeof createOpenRouter>;
 }) {
   try {
     const titleModel = openrouter.chat("google/gemini-2.5-flash", {
@@ -28,7 +30,7 @@ async function generateAndSetChatTitle({
       model: titleModel,
       messages,
       system:
-        "You’ll generate a title for this chat based on the user's message. Return only the title, no quotes or extra text",
+        "You'll generate a title for this chat based on the user's message. Return only the title, no quotes or extra text",
     });
 
     await db.chat.update({
@@ -86,7 +88,7 @@ export async function POST(req: NextRequest) {
       });
 
       // Run background title generation
-      void generateAndSetChatTitle({ id, messages, userId });
+      void generateAndSetChatTitle({ id, messages, userId, openrouter });
     }
 
     // Save last user message (assumes last user message is at the end)
@@ -97,7 +99,7 @@ export async function POST(req: NextRequest) {
           chatId: chat.id,
           userId,
           role: "user",
-          content: userMessage as unknown as object,
+          content: JSON.stringify(userMessage),
         },
       });
     }
@@ -122,7 +124,7 @@ export async function POST(req: NextRequest) {
                 chatId: chat!.id,
                 userId: null,
                 role: "assistant",
-                content: assistantMessage as unknown as object,
+                content: JSON.stringify(assistantMessage),
               },
               select: { id: true },
             });

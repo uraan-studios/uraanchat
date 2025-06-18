@@ -29,6 +29,7 @@ export function Providers({ children }: { children: ReactNode }) {
                 authClient={authClient}
                 navigate={router.push}
                 replace={router.replace}
+                redirectTo="/chat"
                 onSessionChange={() => {
                     // Clear router cache (protected routes)
                     router.refresh()
