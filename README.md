@@ -154,6 +154,4 @@ This project is open source and available under the [MIT License](LICENSE).
 
 ---
 
-**Built with ❤️ by Uraan Studios**
-
-> This project demonstrates modern web development practices, AI integration, and user experience design. It's not just a clone—it's an evolution of the chat interface with unique features and polished execution.
+**Built with ❤️**
