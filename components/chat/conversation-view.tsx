@@ -157,10 +157,10 @@ export function ConversationView({
       return message.content;
     }
     // For assistant messages, parts are on the root
-    const parts = message.content || message.parts || [];
+    const parts: any[] = (message.content as any[]) || (message as any).parts || [];
     return parts
-      .filter((part) => part.type === 'text')
-      .map((part) => ('text' in part ? part.text : ''))
+      .filter((part: any) => part.type === 'text')
+      .map((part: any) => ('text' in part ? part.text : ''))
       .join('');
   };
 

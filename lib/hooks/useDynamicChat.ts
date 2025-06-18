@@ -41,7 +41,7 @@ export function useDynamicChat({ model, onFinish }: UseDynamicChatOptions) {
         }, 100);
         
         // Generate title for the new chat
-        const firstUserMessage = result.messages.find(m => m.role === 'user');
+        const firstUserMessage = ((result as unknown) as { messages: any[] }).messages.find((m: any) => m.role === 'user');
         if (firstUserMessage) {
           generateChatTitle(currentChatId, firstUserMessage.content);
         }
