@@ -364,7 +364,7 @@ const config = {
       "value": "prisma-client-js"
     },
     "output": {
-      "value": "C:\\Users\\pc\\Desktop\\uraan-projs\\uraanchat\\generated\\prisma",
+      "value": "D:\\Projects\\T3-Clone\\uraanchat-myrepo\\uraanchat\\generated\\prisma",
       "fromEnvVar": null
     },
     "config": {
@@ -378,7 +378,7 @@ const config = {
       }
     ],
     "previewFeatures": [],
-    "sourceFilePath": "C:\\Users\\pc\\Desktop\\uraan-projs\\uraanchat\\prisma\\schema.prisma",
+    "sourceFilePath": "D:\\Projects\\T3-Clone\\uraanchat-myrepo\\uraanchat\\prisma\\schema.prisma",
     "isCustomOutput": true
   },
   "relativeEnvPaths": {
