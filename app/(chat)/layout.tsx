@@ -6,6 +6,7 @@ import React from 'react';
 import { useRouter } from 'next/navigation';
 import { AppSidebar } from '@/components/app-sidebar';
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
+import { ApiKeyProvider } from '@/components/apikeyprovider';
 
 interface ChatLayoutProps {
   children: React.ReactNode;
@@ -21,12 +22,15 @@ export function ChatLayout({ children }: ChatLayoutProps) {
   return (
     
     <body className="flex h-screen">
+        <ApiKeyProvider>
       <SidebarProvider>
-      <AppSidebar onNewChat={handleNewChat} />
-      <SidebarInset className="flex-1 overflow-hidden">
-        {children}
-      </SidebarInset>
-    </SidebarProvider>
+
+        <AppSidebar onNewChat={handleNewChat} />
+        <SidebarInset className="flex-1 overflow-hidden">
+          {children}
+        </SidebarInset>
+      </SidebarProvider>
+        </ApiKeyProvider>
     </body>
   );
 }

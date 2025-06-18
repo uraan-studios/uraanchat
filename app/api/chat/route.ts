@@ -4,15 +4,41 @@ import { auth } from "@/lib/auth";
 import db from "@/lib/db";
 import { createOpenRouter } from "@openrouter/ai-sdk-provider";
 import { streamText, CoreMessage, generateText } from "ai";
-import { Settings } from "lucide-react";
 import { NextRequest, NextResponse } from "next/server";
 
-// Optional: Use edge runtime for lower latency
-// export const runtime = "edge";
+// const runtime = "edge"; // Optional: Enable edge runtime
 
-const openrouter = createOpenRouter({
-  apiKey: process.env.OPENROUTER_API_KEY!,
-});
+
+// Background task to generate and set chat title
+async function generateAndSetChatTitle({
+  id,
+  messages,
+  userId,
+}: {
+  id: string;
+  messages: CoreMessage[];
+  userId: string;
+}) {
+  try {
+    const titleModel = openrouter.chat("google/gemini-2.5-flash", {
+      user: userId,
+    });
+
+    const { text } = await generateText({
+      model: titleModel,
+      messages,
+      system:
+        "You’ll generate a title for this chat based on the user's message. Return only the title, no quotes or extra text",
+    });
+
+    await db.chat.update({
+      where: { id },
+      data: { title: text },
+    });
+  } catch (err) {
+    console.error("Failed to generate chat title:", err);
+  }
+}
 
 export async function POST(req: NextRequest) {
   try {
@@ -23,8 +49,14 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
     }
 
+    // Parse request body
     const body = await req.json();
-    const { id, messages, model }: { id: string; messages: CoreMessage[]; model: string } = body;
+    const { id, messages, model, apikey }: { id: string; messages: CoreMessage[]; model: string, apikey: string } = body;
+
+    const openrouter = createOpenRouter({
+      apiKey: apikey!,
+    });
+
 
     if (!model) {
       return NextResponse.json({ error: "Model is required" }, { status: 400 });
@@ -34,12 +66,11 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Messages are required" }, { status: 400 });
     }
 
-    // Use existing chat if `id` exists
+    // Fetch or create chat
     let chat = await db.chat.findUnique({
       where: { id },
     });
 
-    // Optional: Validate ownership of existing chat
     if (chat && chat.userId !== userId) {
       return NextResponse.json({ error: "Unauthorized access to chat" }, { status: 403 });
     }
@@ -49,29 +80,16 @@ export async function POST(req: NextRequest) {
         data: {
           id,
           userId,
-          title: "", // Optional: You can set a preview of the first user message
-          rootMessage: "", // Optional: Set later if needed
+          title: "",
+          rootMessage: "",
         },
       });
 
-      //  MAKE A BACKGROUND JOB TO UPDATE THE TITLE
-
-      const titleModel = openrouter.chat('google/gemini-2.5-flash', {
-        user: userId,
-      });
-      const {text} = await generateText({
-        model: titleModel,
-        messages,
-        system: "Youll generate a title for this chat based on the user's message. Return only the title, no quotes or extra text.\n\nUser message",
-      }) 
-
-      await db.chat.update({
-        where: { id },
-        data: { title: text },
-      });
+      // Run background title generation
+      void generateAndSetChatTitle({ id, messages, userId });
     }
 
-    // Insert the last user message (assumes it's the most recent in the list)
+    // Save last user message (assumes last user message is at the end)
     const userMessage = messages.findLast((m) => m.role === "user");
     if (userMessage) {
       await db.message.create({
@@ -79,30 +97,22 @@ export async function POST(req: NextRequest) {
           chatId: chat.id,
           userId,
           role: "user",
-          content: userMessage as unknown as object, // Store full message as JSON
+          content: userMessage as unknown as object,
         },
       });
     }
 
-    
-
-    // Stream LLM response
+    // Stream assistant response
     const chatModel = openrouter.chat(model, {
-      reasoning: {
-        effort: "high",
-      },
+      reasoning: { effort: "high" },
+      usage: { include: true },
       user: userId,
-      usage: {
-        include: true
-      },
-      
+    });
 
-      });
     const result = await streamText({
       model: chatModel,
       messages,
       system: SYSTEM_MESSAGE,
-      
       async onFinish(result) {
         try {
           const assistantMessage = result.response.messages[0];
@@ -118,15 +128,9 @@ export async function POST(req: NextRequest) {
             });
 
             console.log("Assistant message saved with ID:", saved.id);
-
-            // Optional: Update chat title or rootMessage based on first messages
-            // await db.chat.update({
-            //   where: { id: chat.id },
-            //   data: { title: ..., rootMessage: ... }
-            // });
           }
-        } catch (saveError) {
-          console.error("Failed to save assistant message:", saveError);
+        } catch (err) {
+          console.error("Failed to save assistant message:", err);
         }
       },
     });

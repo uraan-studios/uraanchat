@@ -184,14 +184,8 @@ const ChatPage = () => {
   }
 
   return (
-    <div className="h-full flex flex-col overflow-hidden items-center animate-fadeIn">
+    <div className="h-full flex flex-col overflow-hidden items-center animate-fadeIn relative">
       <div className="w-full max-w-3xl p-2 flex justify-between items-center">
-        <button
-          onClick={createNewChat}
-          className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
-        >
-          New Chat
-        </button>
         <ModelSelector value={model} onChange={updateModel} />
       </div>
 

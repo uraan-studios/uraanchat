@@ -5,6 +5,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { nanoid } from 'nanoid';
 import { useRecentChats } from './useRecentChat';
 import { toast } from 'sonner';
+import { useApiKey } from '@/components/apikeyprovider';
 
 interface UseDynamicChatOptions {
   model: string;
@@ -20,10 +21,12 @@ export function useDynamicChat({ model, onFinish }: UseDynamicChatOptions) {
   const shouldNavigateRef = useRef(false);
   const { addOptimisticChat, updateChatTitle } = useRecentChats();
 
+  const apikey = useApiKey();
+
   const chatHook = useChat({
     api: '/api/chat',
     id: currentChatId || undefined,
-    body: { model },
+    body: { model, apikey },
     onFinish(result) {
       onFinish?.();
       
