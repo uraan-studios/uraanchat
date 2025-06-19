@@ -87,7 +87,7 @@ export function AppSidebar({ onNewChat, ...props }: ChatSidebarProps) {
             className="mt-4 items-center font-semibold bg-primary text-primary-foreground hover:bg-accent hover:text-accent-foreground"
             onClick={onNewChat}
           >
-            <div>New Chat</div>
+            <div onClick={onNewChat}>New Chat</div>
           </SidebarMenuButton>
         </SidebarMenu>
       </SidebarHeader>
